@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espace Artisan - Dépanne Moi</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js" defer></script>
+    <!-- CSS (on réutilise le style de l'admin pour la cohérence structurelle) -->
+    <link rel="stylesheet" href="./admin.css">
+    <style>
+        /* Surcharges spécifiques à l'artisan */
+        :root {
+            /* On donne une teinte légèrement différente (vert foncé/émeraude) pour différencier de l'admin */
+            --color-primary: #0F5A4D; 
+            --color-primary-light: #209983;
+        }
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .portfolio-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            aspect-ratio: 1;
+            background: #e0e0e0;
+        }
+        .portfolio-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        .portfolio-item:hover img {
+            transform: scale(1.05);
+        }
+        .delete-photo-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(231, 76, 60, 0.9);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .portfolio-item:hover .delete-photo-btn {
+            opacity: 1;
+        }
+        .add-photo-btn {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 2px dashed rgba(32, 153, 131, 0.5);
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--color-primary-light);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        .add-photo-btn:hover {
+            background: rgba(32, 153, 131, 0.1);
+            border-color: var(--color-primary-light);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-abstract" style="background-image: url('file:///C:/Users/SEGEASA/.gemini/antigravity-ide/brain/d2158c51-63f8-4376-ada9-8985beda41bd/african_artisans_team_bg_1783283143152.png');"></div>
+
+    <div class="admin-layout" id="artisanDashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar glass-panel">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">Dépanne<span>Moi</span> <br><small style="color: var(--color-primary-light);">Espace Artisan</small></a>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-target="dashboard-view">
+                    <span class="icon">📊</span> Vue d'ensemble
+                </a>
+                <a href="#" class="nav-item" data-target="portfolio-view">
+                    <span class="icon">📷</span> Mes Réalisations
+                </a>
+                <a href="#" class="nav-item" data-target="reviews-view">
+                    <span class="icon">⭐</span> Mes Avis
+                </a>
+                <a href="#" class="nav-item" data-target="settings-view">
+                    <span class="icon">⚙️</span> Paramètres
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="index.html" class="nav-item back-link">
+                    <span class="icon">⬅️</span> Retour au site
+                </a>
+            </div>
+        </aside>
+
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Topbar -->
+            <header class="topbar glass-panel">
+                <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+                <div class="search-bar">
+                    <!-- Vide pour l'artisan -->
+                </div>
+                <div class="topbar-actions">
+                    <div class="admin-profile" id="artisanLogoutBtn" title="Se déconnecter" style="cursor: pointer;">
+                        <img src="https://ui-avatars.com/api/?name=Ouvrier&background=0F5A4D&color=fff" alt="Ouvrier" class="avatar" id="artisanAvatar">
+                        <div class="profile-info">
+                            <span class="name" id="artisanHeaderName">Artisan</span>
+                            <span class="role" style="color: #e74c3c; font-weight: 600;">Déconnexion</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Views Container -->
+            <div class="views-container">
+                
+                <!-- Dashboard View -->
+                <section id="dashboard-view" class="view-section active">
+                    <h2 class="view-title">Bienvenue, <span id="welcomeName">Artisan</span></h2>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card glass-panel">
+                            <div class="stat-icon" style="background: rgba(32, 153, 131, 0.1); color: var(--color-primary-light);">👀</div>
+                            <div class="stat-details">
+                                <span class="stat-value">124</span>
+                                <span class="stat-label">Vues du profil</span>
+                            </div>
+                        </div>
+                        <div class="stat-card glass-panel">
+                            <div class="stat-icon" style="background: rgba(46, 204, 113, 0.1); color: #2ecc71;">💬</div>
+                            <div class="stat-details">
+                                <span class="stat-value">15</span>
+                                <span class="stat-label">Contacts WhatsApp</span>
+                            </div>
+                        </div>
+                        <div class="stat-card glass-panel">
+                            <div class="stat-icon" style="background: rgba(52, 152, 219, 0.1); color: #3498db;">📞</div>
+                            <div class="stat-details">
+                                <span class="stat-value">8</span>
+                                <span class="stat-label">Appels reçus</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Header with Filter -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px; margin-bottom: 10px;">
+                        <h3 style="color: var(--color-primary); margin: 0; font-size: 1.2rem;">Performances de mon profil</h3>
+                        <select id="artisanTimeFilter" style="padding: 8px 15px; border-radius: 8px; border: 1px solid var(--color-primary-light); background: var(--glass-bg); color: var(--color-text); font-family: var(--font-body); outline: none; cursor: pointer;">
+                            <option value="jour">Aujourd'hui</option>
+                            <option value="semaine" selected>Cette Semaine</option>
+                            <option value="mois">Ce Mois</option>
+                            <option value="trimestre">Ce Trimestre</option>
+                            <option value="annee">Cette Année</option>
+                        </select>
+                    </div>
+
+                    <!-- Charts Grid -->
+                    <div class="charts-grid">
+                        <div class="chart-container glass-panel">
+                            <h3 class="chart-title">Vues par Localisation</h3>
+                            <canvas id="artisanRegionChart"></canvas>
+                        </div>
+                        <div class="chart-container glass-panel">
+                            <h3 class="chart-title">Types d'interactions</h3>
+                            <canvas id="artisanJobChart"></canvas>
+                        </div>
+                        <div class="chart-container glass-panel">
+                            <h3 class="chart-title">Trafic sur mon profil</h3>
+                            <canvas id="artisanTrafficChart"></canvas>
+                        </div>
+                        <div class="chart-container glass-panel">
+                            <h3 class="chart-title">Taux de Conversion</h3>
+                            <canvas id="artisanConversionChart"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Reviews View -->
+                <section id="reviews-view" class="view-section hidden">
+                    <h2 class="view-title">Avis & Retours Clients</h2>
+                    <div class="glass-panel" style="padding: 20px; margin-bottom: 20px; text-align: center;">
+                        <h3 style="color: var(--color-primary); font-size: 1.2rem; margin-bottom: 5px;">Note Globale</h3>
+                        <div id="artisanAverageRating" style="font-size: 3rem; font-weight: bold; color: #f39c12;">- / 5</div>
+                        <div id="artisanTotalReviews" style="color: var(--color-text-light);">0 avis reçus</div>
+                    </div>
+                    <div id="artisanReviewsList" style="display: flex; flex-direction: column; gap: 15px;">
+                        <!-- Les avis seront insérés ici par le JS -->
+                    </div>
+                </section>
+
+                <!-- Portfolio View -->
+                <section id="portfolio-view" class="view-section hidden">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2 class="view-title" style="margin-bottom: 0;">Mes Réalisations</h2>
+                        <span class="badge premium" id="planBadge">Formule Standard (Max 3)</span>
+                    </div>
+
+                    <div class="glass-panel" style="padding: 20px;">
+                        <p style="color: var(--color-text-light); margin-bottom: 15px;">Ajoutez des photos de vos travaux pour convaincre les clients de vous faire confiance.</p>
+                        
+                        <div class="portfolio-grid" id="portfolioGrid">
+                            <!-- Bouton Ajouter -->
+                            <div class="portfolio-item add-photo-btn" onclick="document.getElementById('photoInput').click()">
+                                <span style="font-size: 2rem; margin-bottom: 10px;">+</span>
+                                <span>Ajouter une photo</span>
+                                <input type="file" id="photoInput" accept="image/*" style="display: none;" onchange="handlePhotoUpload(event)">
+                            </div>
+                            
+                            <!-- Photos existantes (Simulées) -->
+                            <div class="portfolio-item">
+                                <img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=500&q=80" alt="Réalisation 1">
+                                <button class="delete-photo-btn" onclick="deletePhoto(this)">×</button>
+                            </div>
+                            <div class="portfolio-item">
+                                <img src="https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=500&q=80" alt="Réalisation 2">
+                                <button class="delete-photo-btn" onclick="deletePhoto(this)">×</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Settings View -->
+                <section id="settings-view" class="view-section hidden">
+                    <h2 class="view-title">Paramètres du compte</h2>
+                    
+                    <div class="glass-panel" style="padding: 30px; max-width: 600px;">
+                        <form id="artisanSettingsForm" class="admin-form">
+                            <h3 style="margin-bottom: 20px; font-size: 1.2rem; color: var(--color-primary);">Informations personnelles</h3>
+                            
+                            <div class="form-group" style="text-align: left;">
+                                <label>Nom & Prénom affichés sur le profil</label>
+                                <input type="text" id="settingName" class="admin-input" required>
+                            </div>
+
+                            <div class="form-group" style="text-align: left;">
+                                <label>Description de votre profil (Texte)</label>
+                                <textarea id="settingDescription" class="admin-input" rows="4" placeholder="Décrivez vos spécialités, vos années d'expérience..."></textarea>
+                            </div>
+
+                            <div class="form-group" id="premiumAudioSettings" style="text-align: left; display: none; background: #fff5eb; padding: 15px; border-radius: 8px; border: 1px solid #ffd8a8; margin-bottom: 20px;">
+                                <label style="color: #e67e22;">🎙️ Description Vocale (Premium)</label>
+                                <p style="font-size: 0.8rem; color: #7f8c8d; margin-bottom: 10px;">Votre description audio actuelle :</p>
+                                <audio id="settingAudioPlayback" controls style="width: 100%; margin-bottom: 10px; display: none;"></audio>
+                                <p id="noAudioMsg" style="font-size: 0.8rem; color: #e74c3c; margin-bottom: 10px;">Aucun enregistrement vocal disponible.</p>
+                                
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <button type="button" id="settingRecordBtn" class="btn" style="background: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer;">🔴 Nouvel Enregistrement</button>
+                                    <button type="button" id="settingStopBtn" class="btn" style="display: none; padding: 8px 15px; border-radius: 6px; cursor: pointer;">⏹️ Arrêter</button>
+                                    <span id="settingRecordingTimer" style="font-size: 0.9rem; font-weight: bold; color: #e74c3c; display: none;">00:00</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group" id="standardAudioLock" style="text-align: left; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px dashed #bdc3c7; margin-bottom: 20px;">
+                                <label style="color: #7f8c8d;">🔒 Description Vocale (Verrouillé)</label>
+                                <p style="font-size: 0.8rem; color: #95a5a6; margin-bottom: 0;">Passez à la formule Premium pour pouvoir enregistrer une présentation vocale et rassurer vos clients.</p>
+                            </div>
+                            
+                            <div class="form-group" style="text-align: left;">
+                                <label>Nouveau mot de passe (laisser vide pour ne pas changer)</label>
+                                <input type="password" id="settingPass" class="admin-input" placeholder="••••••••">
+                            </div>
+                            
+                            <hr style="border: 0; border-top: 1px solid rgba(141, 153, 174, 0.2); margin: 30px 0;">
+                            
+                            <button type="submit" class="btn btn-primary magnetic" style="width: 100%;">Enregistrer les modifications</button>
+                        </form>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="./artisan.js"></script>
+</body>
+</html>

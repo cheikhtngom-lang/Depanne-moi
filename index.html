@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dépanne Moi - Ouvriers Premium à la demande</title>
+    <meta name="description" content="Dépanne Moi : Abonnement premium pour des interventions d'urgence. Ouvriers d'élite dans un rayon de 50km.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <!-- Background Elements -->
+    <div class="bg-abstract" style="background-image: url('file:///C:/Users/SEGEASA/.gemini/antigravity-ide/brain/d2158c51-63f8-4376-ada9-8985beda41bd/african_artisans_team_bg_1783283143152.png');"></div>
+
+    <!-- Navigation -->
+    <nav class="glass-nav">
+        <div class="nav-container">
+            <a href="#" class="logo">Dépanne<span>Moi</span></a>
+            <div class="nav-links">
+                <a href="#services">Nos Services</a>
+                <a href="#premium">Abonnement Premium</a>
+                <a href="#zone">Zone 50km</a>
+                <a href="tel:338541098" style="color: var(--color-primary); font-weight: bold;">📞 33 854 10 98</a>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;" id="navAuthGroup">
+                <button class="btn btn-secondary" id="openUserLoginModalBtn"><span class="btn-bg"></span><span class="btn-text">Connexion</span></button>
+                <button class="btn magnetic" id="logoutClientBtn" style="display: none; background: rgba(231, 76, 60, 0.1); color: #e74c3c; border: 1px solid rgba(231, 76, 60, 0.3); padding: 8px 15px; font-size: 0.9rem; border-radius: 8px;"><span class="btn-text">Déconnexion</span></button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="hero-content hidden">
+            <h1>L'élite de l'artisanat,<br><span class="text-gradient">à votre porte.</span></h1>
+            <p class="subtitle">Interventions premium et sur-mesure dans un rayon de 50km. Abonnez-vous à la tranquillité.</p>
+            
+            <div class="glass-card search-card">
+                <div class="search-input">
+                    <label>Que recherchez-vous ?</label>
+                    <input type="text" id="searchJob" placeholder="Ex: Plombier, Électricien">
+                </div>
+                <div class="divider"></div>
+                <div class="search-input">
+                    <label>Votre localisation (Sénégal)</label>
+                    <select id="searchLoc">
+                        <option value="">Toutes les régions</option>
+                        <option value="Dakar">Dakar</option>
+                        <option value="Diourbel">Diourbel</option>
+                        <option value="Fatick">Fatick</option>
+                        <option value="Kaffrine">Kaffrine</option>
+                        <option value="Kaolack">Kaolack</option>
+                        <option value="Kédougou">Kédougou</option>
+                        <option value="Kolda">Kolda</option>
+                        <option value="Louga">Louga</option>
+                        <option value="Matam">Matam</option>
+                        <option value="Saint-Louis">Saint-Louis</option>
+                        <option value="Sédhiou">Sédhiou</option>
+                        <option value="Tambacounda">Tambacounda</option>
+                        <option value="Thiès">Thiès</option>
+                        <option value="Ziguinchor">Ziguinchor</option>
+                    </select>
+                </div>
+                <div class="divider"></div>
+                <div class="search-radius">
+                    <label>Rayon d'action</label>
+                    <span class="badge-radius">Jusqu'à 50km <i class="icon-radar"></i></span>
+                </div>
+                <button class="btn btn-primary magnetic" id="mainSearchBtn"><span class="btn-bg"></span><span class="btn-text">Rechercher</span></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Services Section -->
+    <section id="services" class="section-services" style="padding: 100px 5% 50px;">
+        <div class="container">
+            <div class="section-header">
+                <h2>Nos Services</h2>
+                <p>Découvrez nos domaines d'expertise pour vos dépannages et installations.</p>
+            </div>
+            
+            <div class="grid-features">
+                <div class="glass-card feature-card hidden">
+                    <div class="feature-icon" style="background: rgba(52, 152, 219, 0.1); color: #3498db;">🔧</div>
+                    <h3>Plomberie</h3>
+                    <p>Réparation de fuites, débouchage de canalisations, et installation sanitaire complète.</p>
+                </div>
+                <div class="glass-card feature-card hidden" style="transition-delay: 100ms;">
+                    <div class="feature-icon" style="background: rgba(241, 196, 15, 0.1); color: #f1c40f;">⚡</div>
+                    <h3>Électricité</h3>
+                    <p>Dépannage de pannes, résolution de courts-circuits, et mise aux normes électriques.</p>
+                </div>
+                <div class="glass-card feature-card hidden" style="transition-delay: 200ms;">
+                    <div class="feature-icon" style="background: rgba(46, 204, 113, 0.1); color: #2ecc71;">❄️</div>
+                    <h3>Froid & Climatisation</h3>
+                    <p>Entretien, réparation et installation de vos systèmes de climatisation.</p>
+                </div>
+                <div class="glass-card feature-card hidden" style="transition-delay: 300ms;">
+                    <div class="feature-icon" style="background: rgba(230, 126, 34, 0.1); color: #e67e22;">🔨</div>
+                    <h3>Menuiserie</h3>
+                    <p>Réparation de portes, remplacement de serrures et menuiserie générale.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Premium Section -->
+    <section id="premium" class="section-premium">
+        <div class="container">
+            <div class="section-header hidden">
+                <h2>L'Excellence <br>sur Abonnement</h2>
+                <p>Pourquoi se contenter de l'ordinaire quand l'urgence frappe ?</p>
+            </div>
+            
+            <div class="grid-features">
+                <div class="glass-card feature-card hidden">
+                    <div class="feature-icon">⭐</div>
+                    <h3>Ouvriers d'Élite</h3>
+                    <p>Sélectionnés rigoureusement pour leur savoir-faire exceptionnel et leur professionnalisme.</p>
+                </div>
+                <div class="glass-card feature-card hidden" style="transition-delay: 100ms;">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Priorité Absolue</h3>
+                    <p>En tant qu'abonné, passez devant tout le monde. Intervention garantie en un temps record.</p>
+                </div>
+                <div class="glass-card feature-card hidden" style="transition-delay: 200ms;">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Rayon de 50km</h3>
+                    <p>Une couverture géographique précise pour une réactivité maximale de nos artisans.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Zone Section -->
+    <section id="zone" class="section-zone hidden">
+        <div class="container zone-container glass-card">
+            <div class="zone-text">
+                <h2>Proche. Rapide. Efficace.</h2>
+                <p>Notre réseau exclusif est calibré pour un maillage parfait. Dans un rayon de 50 kilomètres, nous vous garantissons l'arrivée d'un professionnel premium.</p>
+                <a href="#" class="btn btn-primary"><span class="btn-bg"></span><span class="btn-text">Découvrir la couverture</span></a>
+            </div>
+            <div class="zone-visual">
+                <div class="radar-circle">
+                    <div class="pulse"></div>
+                    <div class="dot center"></div>
+                    <div class="dot d1"></div>
+                    <div class="dot d2"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Artisan Section -->
+    <section id="artisan" class="section-artisan hidden">
+        <div class="container artisan-container">
+            <div class="artisan-header">
+                <h2>Vous êtes un Pro ? Rejoignez l'élite.</h2>
+                <p>Développez votre clientèle avec notre abonnement exclusif pour artisans qualifiés. Boostez votre visibilité dans votre zone d'intervention.</p>
+            </div>
+            <div class="pricing-grid">
+                <!-- Essai Gratuit -->
+                <div class="pricing-card glass-card">
+                    <span class="badge-pro" style="background: rgba(46, 204, 113, 0.1); color: #2ecc71;">Gratuit 3 Mois</span>
+                    <h3 class="price">0 FCFA <span>/ 3 mois (renouv.)</span></h3>
+                    <ul>
+                        <li><i class="icon-check">✓</i> Test de la plateforme</li>
+                        <li><i class="icon-check">✓</i> Accès aux demandes</li>
+                        <li><i class="icon-check">✓</i> Portfolio : 10 photos, 4 vidéos</li>
+                    </ul>
+                    <button class="btn btn-secondary open-modal-btn" data-plan="essai" data-price="0"><span class="btn-bg"></span><span class="btn-text">Démarrer l'essai</span></button>
+                </div>
+
+                <div class="pricing-card glass-card">
+                    <span class="badge-pro">Formule Standard</span>
+                    <h3 class="price">5000 FCFA <span>/ mois</span></h3>
+                    <ul>
+                        <li><i class="icon-check">✓</i> Profil vérifié</li>
+                        <li><i class="icon-check">✓</i> Accès aux demandes (Rayon 50km)</li>
+                        <li><i class="icon-check">✓</i> Portfolio limité (Max 3 réalisations)</li>
+                    </ul>
+                    <button class="btn btn-secondary open-modal-btn" data-plan="standard" data-price="5000"><span class="btn-bg"></span><span class="btn-text">Choisir Standard</span></button>
+                </div>
+
+                <div class="pricing-card glass-card premium-card">
+                    <div class="card-glow"></div>
+                    <span class="badge-premium">Formule Premium</span>
+                    <h3 class="price">8990 FCFA <span>/ mois</span></h3>
+                    <ul>
+                        <li><i class="icon-check">✓</i> <strong>Toujours à la une (Visibilité max)</strong></li>
+                        <li><i class="icon-check">✓</i> Accès prioritaire (Rayon 50km)</li>
+                        <li><i class="icon-check">✓</i> Portfolio étendu (10 à 20 réalisations)</li>
+                    </ul>
+                    <button class="btn btn-primary open-modal-btn" data-plan="premium" data-price="8990"><span class="btn-bg"></span><span class="btn-text">Choisir Premium</span></button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Forgot Password Modal -->
+    <div class="modal-overlay" id="forgotPassClientModal">
+        <div class="modal-content glass-card" style="max-width: 400px; text-align: center;">
+            <button class="modal-close" id="closeForgotPassClientBtn">&times;</button>
+            <h2>Réinitialisation</h2>
+            <p class="modal-subtitle">Saisissez vos identifiants d'adhésion</p>
+            
+            <form class="registration-form" id="forgotPassClientForm">
+                <div class="form-group" style="text-align: left;">
+                    <label>Email ou Numéro de téléphone</label>
+                    <input type="text" id="forgotClientContact" placeholder="ex: 771234567 ou email@.com" required>
+                </div>
+                <div id="forgotPassClientSuccess" style="color: #2ecc71; font-size: 0.9rem; margin-bottom: 15px; padding: 10px; background: rgba(46, 204, 113, 0.1); border-radius: 8px; border: 1px solid rgba(46, 204, 113, 0.3); display: none;"></div>
+                <button type="submit" id="forgotPassClientSubmitBtn" class="btn btn-primary full-width" style="margin-top: 10px;"><span class="btn-bg"></span><span class="btn-text">Envoyer le lien</span></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-brand">
+                <a href="#" class="logo">Dépanne<span>Moi</span></a>
+                <p>La nouvelle norme du dépannage premium.</p>
+            </div>
+            <div class="footer-links">
+                <a href="#">Mentions légales</a>
+                <a href="#">Conditions générales</a>
+                <a href="#">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Search Results Modal -->
+    <div class="modal-overlay" id="searchResultsModal">
+        <div class="modal-content glass-card" style="max-width: 600px;">
+            <button class="modal-close" id="closeSearchModalBtn">&times;</button>
+            <h2>Résultats de la recherche</h2>
+            <p class="modal-subtitle" id="searchQueryText">Artisans trouvés</p>
+            
+            <div id="searchResultsList" style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px; max-height: 400px; overflow-y: auto;">
+                <!-- Résultats injectés ici par JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="modal-overlay" id="paymentModal">
+        <div class="modal-content glass-card" style="max-width: 400px; text-align: center;">
+            <button class="modal-close" id="closePaymentModalBtn">&times;</button>
+            <h2 style="margin-bottom: 10px;">Paiement Sécurisé</h2>
+            <p class="modal-subtitle" id="paymentAmountText" style="font-size: 1.1rem; color: var(--color-primary); font-weight: bold;">Montant : 5000 FCFA</p>
+            
+            <p style="margin-top: 10px; font-size: 0.9rem; color: var(--color-text-light);">Choisissez votre moyen de paiement :</p>
+            
+            <div id="paymentOptions" style="display: flex; gap: 15px; margin-top: 20px; justify-content: center;">
+                <button class="btn payment-btn" id="payWaveBtn" style="background: #1c52f6; color: white; border: none; padding: 15px; border-radius: 12px; cursor: pointer; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;">
+                    <span style="font-size: 1.8rem;">👋</span>
+                    <span style="font-weight: 700; font-size: 1rem;">Wave</span>
+                </button>
+                <button class="btn payment-btn" id="payOmBtn" style="background: #ff6600; color: white; border: none; padding: 15px; border-radius: 12px; cursor: pointer; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;">
+                    <span style="font-size: 1.8rem;">🟧</span>
+                    <span style="font-weight: 700; font-size: 1rem;">Orange Money</span>
+                </button>
+            </div>
+            
+            <div id="paymentProcessing" style="display: none; margin-top: 25px;">
+                <div class="spinner"></div>
+                <p style="color: var(--color-primary); font-weight: bold; margin-top: 10px;" id="paymentStatusText">Veuillez valider sur votre téléphone...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal-content glass-card" style="max-width: 400px; text-align: center;">
+            <button class="modal-close" id="closeLoginModalBtn">&times;</button>
+            <h2>Bon retour !</h2>
+            <p class="modal-subtitle">Connectez-vous à votre espace</p>
+            
+            <form class="registration-form" id="clientLoginForm">
+                <div id="loginErrorMsg" style="color: #e74c3c; font-size: 0.9rem; margin-bottom: 15px; padding: 10px; background: rgba(231, 76, 60, 0.1); border-radius: 6px; display: none; text-align: left;"></div>
+                <div class="form-group" style="text-align: left;">
+                    <label>Email ou Téléphone</label>
+                    <input type="text" placeholder="votre@email.com" required>
+                </div>
+                <div class="form-group" style="text-align: left;">
+                    <label>Mot de passe</label>
+                    <input type="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-primary full-width" style="margin-top: 10px;"><span class="btn-bg"></span><span class="btn-text">Se connecter</span></button>
+                <p style="margin-top: 20px; font-size: 0.85rem; color: var(--color-text-light);">
+                    <a href="#" id="openForgotPassClientBtn" style="color: var(--color-primary); text-decoration: underline;">Mot de passe oublié ?</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Registration Modal -->
+    <div class="modal-overlay" id="registrationModal">
+        <div class="modal-content glass-card">
+            <button class="modal-close" id="closeModalBtn">&times;</button>
+            <h2>Créer mon compte Ouvrier</h2>
+            <p class="modal-subtitle" id="modalSubtitle">Formule - Prix FCFA/mois</p>
+            
+            <form class="registration-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nom & Prénom</label>
+                        <input type="text" id="regName" placeholder="Ex: Moussa Diop" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Mot de passe</label>
+                        <input type="password" id="regPassword" placeholder="Min. 8 caractères" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Téléphone</label>
+                        <input type="tel" id="regPhone" placeholder="+221..." required>
+                    </div>
+                    <div class="form-group">
+                        <label>Profession</label>
+                        <input type="text" id="regJob" placeholder="Ex: Plombier, Électricien" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Région (Sénégal)</label>
+                        <select id="regRegion" required>
+                            <option value="">Sélectionnez une région</option>
+                            <option value="Dakar">Dakar</option>
+                            <option value="Diourbel">Diourbel</option>
+                            <option value="Fatick">Fatick</option>
+                            <option value="Kaffrine">Kaffrine</option>
+                            <option value="Kaolack">Kaolack</option>
+                            <option value="Kédougou">Kédougou</option>
+                            <option value="Kolda">Kolda</option>
+                            <option value="Louga">Louga</option>
+                            <option value="Matam">Matam</option>
+                            <option value="Saint-Louis">Saint-Louis</option>
+                            <option value="Sédhiou">Sédhiou</option>
+                            <option value="Tambacounda">Tambacounda</option>
+                            <option value="Thiès">Thiès</option>
+                            <option value="Ziguinchor">Ziguinchor</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Département / Quartier</label>
+                        <input type="text" id="regArea" placeholder="Ex: Pikine, Almadies..." required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Photo de profil</label>
+                    <div class="file-upload">
+                        <span>Glissez votre photo ici ou cliquez</span>
+                        <input type="file" accept="image/*">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description de votre profil</label>
+                    <textarea id="regDescription" rows="3" placeholder="Parlez de votre expérience, de vos spécialités..."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary full-width"><span class="btn-bg"></span><span class="btn-text" id="modalSubmitBtnText">Valider & Payer</span></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- User Login Modal -->
+    <div class="modal-overlay" id="userLoginModal">
+        <div class="modal-content glass-card" style="max-width: 400px; text-align: left;">
+            <button class="modal-close" id="closeUserLoginModalBtn">&times;</button>
+            <h2 style="color: var(--color-primary); margin-bottom: 5px; font-size: 1.8rem; text-align: center;">Espace Membre</h2>
+            <p style="color: var(--color-text-light); margin-bottom: 25px; text-align: center; font-size: 0.95rem;">Ouvriers et Clients</p>
+            
+            <form id="userLoginForm">
+                <div class="form-group">
+                    <label>Nom, Email ou Téléphone</label>
+                    <input type="text" id="userLoginInput" class="admin-input" placeholder="ex: Jean Dupont, jean@..., 77..." required style="width: 100%; padding: 12px; border: 1px solid rgba(26, 86, 123, 0.2); border-radius: 8px; font-family: 'Inter', sans-serif;">
+                </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>Mot de passe</label>
+                    <input type="password" id="userPassInput" class="admin-input" placeholder="••••••••" required style="width: 100%; padding: 12px; border: 1px solid rgba(26, 86, 123, 0.2); border-radius: 8px; font-family: 'Inter', sans-serif;">
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; margin-bottom: 20px;">
+                    <label style="font-size: 0.85rem; color: var(--color-text-light); display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                        <input type="checkbox" id="userRememberMe"> Se souvenir de moi
+                    </label>
+                    <a href="#" style="font-size: 0.85rem; color: var(--color-primary-light); text-decoration: none; font-weight: 500;">Oublié ?</a>
+                </div>
+                
+                <div id="userLoginError" class="hidden" style="color: #e74c3c; font-size: 0.9rem; margin-bottom: 15px; text-align: center; background: rgba(231, 76, 60, 0.1); padding: 10px; border-radius: 6px;">Identifiants incorrects.</div>
+                
+                <button type="submit" class="btn btn-primary full-width" style="margin-top: 10px;"><span class="btn-bg"></span><span class="btn-text">Se connecter</span></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Client Registration Modal -->
+    <div class="modal-overlay" id="clientRegistrationModal">
+        <div class="modal-content glass-card" style="max-width: 450px; text-align: left;">
+            <button class="modal-close" id="closeClientRegModalBtn">&times;</button>
+            <h2 style="color: var(--color-primary); margin-bottom: 5px; font-size: 1.8rem; text-align: center;">Inscription Gratuite</h2>
+            <p style="color: var(--color-text-light); margin-bottom: 25px; text-align: center; font-size: 0.95rem;">Créez un compte pour contacter nos ouvriers.</p>
+            
+            <form id="clientRegistrationForm">
+                <div class="form-group">
+                    <label>Nom & Prénom</label>
+                    <input type="text" id="clientRegName" class="admin-input" placeholder="Ex: Jean Dupont" required style="width: 100%; padding: 12px; border: 1px solid rgba(26, 86, 123, 0.2); border-radius: 8px;">
+                </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>Adresse complète (Quartier, Ville)</label>
+                    <input type="text" id="clientRegAddress" class="admin-input" placeholder="Ex: Almadies, Dakar" required style="width: 100%; padding: 12px; border: 1px solid rgba(26, 86, 123, 0.2); border-radius: 8px;">
+                </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>Numéro de Téléphone</label>
+                    <input type="tel" id="clientRegPhone" class="admin-input" placeholder="Ex: 77 123 45 67" required style="width: 100%; padding: 12px; border: 1px solid rgba(26, 86, 123, 0.2); border-radius: 8px;">
+                </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>Mot de passe</label>
+                    <input type="password" id="clientRegPass" class="admin-input" placeholder="Min. 6 caractères" required style="width: 100%; padding: 12px; border: 1px solid rgba(26, 86, 123, 0.2); border-radius: 8px;">
+                </div>
+                
+                <button type="submit" class="btn btn-primary full-width" style="margin-top: 25px;"><span class="btn-bg"></span><span class="btn-text">S'inscrire et Contacter</span></button>
+                <div style="text-align: center; margin-top: 15px;">
+                    <a href="#" id="switchToLoginBtn" style="font-size: 0.85rem; color: var(--color-primary-light); text-decoration: none; font-weight: 500;">Déjà un compte ? Connectez-vous</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Review Modal -->
+    <div class="modal-overlay" id="reviewModal">
+        <div class="modal-content glass-card" style="max-width: 450px; text-align: left;">
+            <button class="modal-close" id="closeReviewModalBtn">&times;</button>
+            <h2 style="color: var(--color-primary); margin-bottom: 5px; font-size: 1.8rem; text-align: center;">Laisser un Avis</h2>
+            <p style="color: var(--color-text-light); margin-bottom: 25px; text-align: center; font-size: 0.95rem;">Évaluez <span id="reviewArtisanName" style="font-weight:bold;">cet artisan</span></p>
+            
+            <form id="reviewForm">
+                <input type="hidden" id="reviewArtisanId">
+                <input type="hidden" id="reviewArtisanNameInput">
+                
+                <div class="form-group" style="text-align: center; margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 10px;">Votre note</label>
+                    <div id="starRating" style="font-size: 2.5rem; color: #bdc3c7; cursor: pointer; display: flex; justify-content: center; gap: 5px;">
+                        <span data-value="1" style="color: #bdc3c7;">★</span>
+                        <span data-value="2" style="color: #bdc3c7;">★</span>
+                        <span data-value="3" style="color: #bdc3c7;">★</span>
+                        <span data-value="4" style="color: #bdc3c7;">★</span>
+                        <span data-value="5" style="color: #bdc3c7;">★</span>
+                    </div>
+                    <input type="hidden" id="reviewScore" value="0" required>
+                    <!-- Progress Bar -->
+                    <div style="margin-top: 15px; background: #e0e0e0; border-radius: 10px; height: 10px; width: 100%; overflow: hidden;">
+                        <div id="ratingProgressBar" style="height: 100%; width: 0%; background: #e74c3c; transition: width 0.3s ease, background-color 0.3s ease;"></div>
+                    </div>
+                    <div id="ratingText" style="margin-top: 5px; font-size: 0.85rem; color: var(--color-text-light); font-weight: 600;">Veuillez donner une note</div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Votre commentaire</label>
+                    <textarea id="reviewComment" class="admin-input" rows="4" placeholder="Décrivez votre expérience avec cet artisan..." required style="width: 100%; padding: 12px; border: 1px solid rgba(26, 86, 123, 0.2); border-radius: 8px; font-family: 'Inter', sans-serif; resize: vertical;"></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary full-width" style="margin-top: 25px;"><span class="btn-bg"></span><span class="btn-text">Envoyer mon avis</span></button>
+            </form>
+        </div>
+    </div>
+
+    <script src="./main.js"></script>
+</body>
+</html>

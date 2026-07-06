@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facture Dépanne-Moi</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: Arial, Helvetica, sans-serif; color: #000; background-color: #fff; line-height: 1.4; font-size: 12px; }
+        .page-container { max-width: 800px; margin: 0 auto; padding: 40px; background: #fff; }
+        @media print {
+            .no-print { display: none !important; }
+            body { font-size: 10pt; }
+            .page-container { padding: 0; max-width: 100%; }
+        }
+        .top-section { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; }
+        .logo-container { font-size: 24px; font-weight: bold; color: #0F5A4D; }
+        .company-info { text-align: right; }
+        .company-info p { margin-bottom: 2px; }
+        .company-info .date { margin-bottom: 10px; }
+        .title-section { margin-bottom: 40px; }
+        .title-section h1 { font-size: 32px; font-weight: normal; color: #333; line-height: 1.1; margin-bottom: 15px; }
+        .title-section p { font-size: 12px; color: #333; }
+        .bill-to-section { margin-bottom: 50px; }
+        .bill-to-section p { margin-bottom: 2px; }
+        .bill-to-section strong { font-weight: bold; display: block; margin-bottom: 5px; }
+        .spacer { height: 15px; }
+        .split-section { display: flex; justify-content: space-between; margin-bottom: 60px; }
+        .details-col { width: 45%; }
+        .summary-col { width: 45%; }
+        .section-heading { font-weight: bold; margin-bottom: 15px; font-size: 12px; text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table td { padding: 5px 0; vertical-align: top; }
+        .data-table td:last-child { text-align: right; }
+        .total-highlight { border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 10px 0; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .total-highlight .amount { font-size: 18px; font-weight: bold; }
+        .sub-heading { font-weight: bold; margin-bottom: 8px; margin-top: 15px; }
+        .footer-note { font-size: 10px; color: #555; margin-top: 100px; text-align: center; border-top: 1px solid #eee; padding-top: 10px; }
+        .action-buttons { text-align: center; margin-bottom: 20px; padding: 20px; background: #f8f9fa; }
+        .btn { padding: 8px 16px; background: #0F5A4D; border: none; cursor: pointer; text-decoration: none; color: #fff; font-size: 12px; margin: 0 5px; border-radius: 4px; font-weight: bold; }
+        .btn-secondary { background: #e2e8f0; color: #000; }
+        .btn:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+
+    <div class="action-buttons no-print">
+        <a href="admin.html" class="btn btn-secondary">Retour à l'administration</a>
+        <button onclick="window.print()" class="btn">Imprimer PDF</button>
+    </div>
+
+    <div class="page-container" id="invoiceContent" style="display: none;">
+        
+        <!-- Top Section -->
+        <div class="top-section">
+            <div class="logo-container">
+                <img src="file:///C:/Users/SEGEASA/Downloads/Bustane.png" alt="Bustane Logo" style="max-height: 50px;">
+            </div>
+            <div class="company-info">
+                <p class="date" id="invDateTop"></p>
+                <p><strong>Bustane</strong></p>
+                <div class="spacer"></div>
+                <p>Rufisque</p>
+                <p>Dakar</p>
+                <p>Sénégal</p>
+                <p>Tél: 33 854 10 98</p>
+            </div>
+        </div>
+
+        <!-- Title Section -->
+        <div class="title-section">
+            <h1>Facture<br>d'Abonnement</h1>
+            <p>N° de facture : <strong id="invNumber"></strong></p>
+        </div>
+
+        <!-- Bill To Section -->
+        <div class="bill-to-section">
+            <strong>Facturé à :</strong>
+            <p id="invClientName" style="font-size: 14px; font-weight: bold;"></p>
+            <p id="invClientPhone"></p>
+            <div class="spacer"></div>
+            <p id="invClientZone"></p>
+            <p>Dakar</p>
+            <p>Sénégal</p>
+        </div>
+
+        <!-- Split Section -->
+        <div class="split-section">
+            
+            <!-- Details Column -->
+            <div class="details-col">
+                <div class="section-heading">Détails de l'Abonnement</div>
+                <table class="data-table">
+                    <tr>
+                        <td>N° de facture</td>
+                        <td id="invNumberTable"></td>
+                    </tr>
+                    <tr>
+                        <td>Date de facturation</td>
+                        <td id="invDateTable"></td>
+                    </tr>
+                    <tr>
+                        <td>Type de forfait</td>
+                        <td><strong id="invPlanType"></strong></td>
+                    </tr>
+                    <tr>
+                        <td>Durée d'engagement</td>
+                        <td>1 Mois</td>
+                    </tr>
+                    <tr>
+                        <td>Moyen de paiement</td>
+                        <td id="invPaymentMethod"></td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Cost Summary Column -->
+            <div class="summary-col">
+                <div class="section-heading">Résumé des Coûts</div>
+                
+                <div class="total-highlight">
+                    <span>Total TTC (FCFA)</span>
+                    <span class="amount" id="invTotalMain"></span>
+                </div>
+
+                <div class="sub-heading">Détails de tarification :</div>
+                <table class="data-table">
+                    <tr>
+                        <td>Sous-total (HT)</td>
+                        <td id="invSubtotal"></td>
+                    </tr>
+                    <tr>
+                        <td>TVA (18%)</td>
+                        <td id="invTva"></td>
+                    </tr>
+                    <tr style="font-weight: bold; font-size: 14px; border-top: 1px solid #eee;">
+                        <td style="padding-top: 10px;">Total Payé (TTC)</td>
+                        <td style="padding-top: 10px;" id="invTotalSub"></td>
+                    </tr>
+                </table>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="footer-note">
+            Ce document tient lieu de reçu officiel pour votre abonnement sur la plateforme Dépanne-Moi. En cas de réclamation, veuillez nous contacter via support@depanne-moi.sn.
+        </div>
+    </div>
+
+    <div id="errorContent" style="display: none; text-align: center; padding: 50px; font-family: sans-serif;">
+        <h2 style="color: #e74c3c;">Facture introuvable</h2>
+        <p>L'identifiant de la facture est invalide ou l'artisan n'existe plus.</p>
+        <a href="admin.html" style="color: #0F5A4D;">Retour à l'administration</a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const workerId = urlParams.get('id');
+
+            if (!workerId) {
+                document.getElementById('errorContent').style.display = 'block';
+                return;
+            }
+
+            const workers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
+            const worker = workers.find(w => w.id.toString() === workerId);
+
+            if (!worker) {
+                document.getElementById('errorContent').style.display = 'block';
+                return;
+            }
+
+            // Calculs
+            const subtotal = parseInt(worker.price) || 0;
+            const tva = Math.round(subtotal * 0.18);
+            const total = subtotal + tva;
+            const dateStr = worker.date || new Date().toLocaleDateString('fr-FR');
+            
+            // Format FCFA
+            const formatFCFA = (amount) => new Intl.NumberFormat('fr-FR').format(amount) + ' FCFA';
+
+            // DOM Injection
+            document.getElementById('invDateTop').textContent = dateStr;
+            document.getElementById('invDateTable').textContent = dateStr;
+            document.getElementById('invNumber').textContent = 'INV-' + worker.id;
+            document.getElementById('invNumberTable').textContent = 'INV-' + worker.id;
+            
+            document.getElementById('invClientName').textContent = worker.name;
+            document.getElementById('invClientPhone').textContent = worker.phone || '';
+            document.getElementById('invClientZone').textContent = worker.zone || 'Zone non définie';
+            
+            document.getElementById('invPlanType').textContent = 'Formule ' + worker.plan;
+            
+            let paymentMethodHTML = worker.paymentMethod || 'Carte';
+            if (worker.paymentMethod === 'Orange Money') {
+                paymentMethodHTML = `<span style="background: #ff6600; color: white; padding: 3px 8px; border-radius: 4px; font-weight: bold; display: inline-flex; align-items: center; gap: 5px;"><span>🟧</span> Orange Money</span>`;
+            } else if (worker.paymentMethod === 'Wave') {
+                paymentMethodHTML = `<span style="background: #1c52f6; color: white; padding: 3px 8px; border-radius: 4px; font-weight: bold; display: inline-flex; align-items: center; gap: 5px;"><span>👋</span> Wave</span>`;
+            }
+            document.getElementById('invPaymentMethod').innerHTML = paymentMethodHTML;
+
+            document.getElementById('invSubtotal').textContent = formatFCFA(subtotal);
+            document.getElementById('invTva').textContent = formatFCFA(tva);
+            document.getElementById('invTotalMain').textContent = formatFCFA(total);
+            document.getElementById('invTotalSub').textContent = formatFCFA(total);
+
+            document.getElementById('invoiceContent').style.display = 'block';
+        });
+    </script>
+</body>
+</html>
