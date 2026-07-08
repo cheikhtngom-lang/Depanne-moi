@@ -892,6 +892,47 @@ window.resetWorkerPassword = function(id) {
 window.initAdminCharts = function() {
     if (typeof Chart === 'undefined') return;
 
+    // --- Dynamic Data Extraction ---
+    const workers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
+    const users = JSON.parse(localStorage.getItem('depanne_users')) || [];
+    
+    // Update Global Stats
+    const statGrowth = document.getElementById('statGrowth');
+    const statAvgTime = document.getElementById('statAvgTime');
+    const statSatisfaction = document.getElementById('statSatisfaction');
+    
+    if(statGrowth) statGrowth.textContent = `${users.length} / ${workers.length}`;
+    
+    let premiumCount = 0;
+    let standardRevenue = 0;
+    const regionCounts = {};
+    const jobCounts = {};
+    
+    workers.forEach(w => {
+        if (w.plan === 'Premium') premiumCount++;
+        if (w.plan === 'Standard') standardRevenue += 5000;
+        
+        let region = w.zone.split('/')[0] ? w.zone.split('/')[0].trim() : 'Inconnu';
+        regionCounts[region] = (regionCounts[region] || 0) + 1;
+        
+        let job = w.job ? w.job.trim() : 'Inconnu';
+        jobCounts[job] = (jobCounts[job] || 0) + 1;
+    });
+    
+    if(statAvgTime) statAvgTime.textContent = premiumCount;
+    if(statSatisfaction) statSatisfaction.textContent = new Intl.NumberFormat('fr-FR').format(standardRevenue).replace(/,/g, ' ') + " FCFA";
+
+    // Prepare Region Data
+    const sortedRegions = Object.entries(regionCounts).sort((a,b)=>b[1]-a[1]).slice(0, 5);
+    const regionLabels = sortedRegions.map(k => k[0]);
+    const regionData = sortedRegions.map(k => k[1]);
+    
+    // Prepare Job Data
+    const sortedJobs = Object.entries(jobCounts).sort((a,b)=>b[1]-a[1]).slice(0, 5);
+    const jobLabels = sortedJobs.map(k => k[0]);
+    const jobData = sortedJobs.map(k => k[1]);
+
+    // --- Chart Defaults ---
     Chart.defaults.color = 'rgba(26, 86, 123, 0.6)';
     Chart.defaults.font.family = "'Inter', sans-serif";
     
@@ -930,9 +971,9 @@ window.initAdminCharts = function() {
         new Chart(ctxRegion, {
             type: 'bar',
             data: {
-                labels: ['Dakar', 'Thiès', 'St-Louis', 'Diourbel', 'Kaolack'],
+                labels: regionLabels.length ? regionLabels : ['Aucune donnée'],
                 datasets: [{
-                    data: [145, 82, 45, 30, 22],
+                    data: regionData.length ? regionData : [0],
                     backgroundColor: 'rgba(58, 134, 255, 0.8)',
                     borderRadius: 6,
                     borderSkipped: false
@@ -947,9 +988,9 @@ window.initAdminCharts = function() {
         new Chart(ctxJob, {
             type: 'doughnut',
             data: {
-                labels: ['Plombier', 'Électricien', 'Menuisier', 'Maçon', 'Peintre'],
+                labels: jobLabels.length ? jobLabels : ['Aucune donnée'],
                 datasets: [{
-                    data: [35, 25, 20, 15, 5],
+                    data: jobData.length ? jobData : [0],
                     backgroundColor: ['#3a86ff', '#2ecc71', '#f39c12', '#9b59b6', '#e74c3c'],
                     borderWidth: 0,
                     hoverOffset: 10

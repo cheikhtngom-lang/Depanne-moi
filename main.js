@@ -146,6 +146,51 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
+        // --- Legal and CGU Modals ---
+        const openLegalModalBtn = document.getElementById('openLegalModalBtn');
+        const legalModal = document.getElementById('legalModal');
+        const closeLegalModalBtn = document.getElementById('closeLegalModalBtn');
+
+        const openTermsModalBtn = document.getElementById('openTermsModalBtn');
+        const termsModal = document.getElementById('termsModal');
+        const closeTermsModalBtn = document.getElementById('closeTermsModalBtn');
+
+        if(openLegalModalBtn && legalModal) {
+            openLegalModalBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                legalModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            });
+            closeLegalModalBtn.addEventListener('click', () => {
+                legalModal.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+            legalModal.addEventListener('click', (e) => {
+                if (e.target === legalModal) {
+                    legalModal.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+        }
+
+        if(openTermsModalBtn && termsModal) {
+            openTermsModalBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                termsModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            });
+            closeTermsModalBtn.addEventListener('click', () => {
+                termsModal.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+            termsModal.addEventListener('click', (e) => {
+                if (e.target === termsModal) {
+                    termsModal.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+        }
+
         // --- User Login Modal Logic ---
         const openUserLoginBtn = document.getElementById('openUserLoginModalBtn');
         const userLoginModal = document.getElementById('userLoginModal');
