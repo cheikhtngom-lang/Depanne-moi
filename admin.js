@@ -55,8 +55,8 @@ document.addEventListener("DOMContentLoaded", () => {
                        u.role === 'Admin';
             });
 
-            // Identifiants: admin / admin123 (par défaut) OU utilisateur valide
-            if ((user === 'admin' && pass === 'admin123') || validUser) {
+            // Identifiants: admin / admin123456 (par défaut) OU utilisateur valide
+            if ((user === 'admin' && pass === 'admin123456') || validUser) {
                 // Sauvegarde de la session
                 sessionStorage.setItem('admin_auth_token', 'true');
                 localStorage.removeItem('admin_login_attempts'); // Réinitialiser après succès
@@ -181,15 +181,15 @@ document.addEventListener("DOMContentLoaded", () => {
             '"': '&quot;'
         }[tag]));
         
-        if (workers.length > 0) {
-            let html = '';
-            let billingHtml = '';
-            let historyHtml = '';
-            let standardHtml = '';
-            let premiumHtml = '';
-            let totalRevenue = 1425000;
-            let premiumCount = 142;
+        let html = '';
+        let billingHtml = '';
+        let historyHtml = '';
+        let standardHtml = '';
+        let premiumHtml = '';
+        let totalRevenue = 0;
+        let premiumCount = 0;
 
+        if (workers.length > 0) {
             // Inverser pour avoir les plus récents en premier
             const sortedWorkers = [...workers].reverse();
 
@@ -302,6 +302,15 @@ document.addEventListener("DOMContentLoaded", () => {
             if (statPremiumWorkers) {
                 statPremiumWorkers.textContent = premiumCount;
             }
+        } else {
+            // Update UI with empty variables even if workers.length === 0
+            if (adminWorkersTable) adminWorkersTable.innerHTML = html;
+            if (adminBillingTable) adminBillingTable.innerHTML = billingHtml;
+            if (adminHistoryTable) adminHistoryTable.innerHTML = historyHtml;
+            if (adminStandardTable) adminStandardTable.innerHTML = standardHtml;
+            if (adminPremiumTable) adminPremiumTable.innerHTML = premiumHtml;
+            if (statRevenue) statRevenue.textContent = "0 FCFA";
+            if (statPremiumWorkers) statPremiumWorkers.textContent = "0";
         }
     }
 
