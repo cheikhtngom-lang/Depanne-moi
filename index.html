@@ -409,9 +409,10 @@
                 
                 <div class="form-group">
                     <label>Photo de profil</label>
-                    <div class="file-upload">
-                        <span>Glissez votre photo ici ou cliquez</span>
-                        <input type="file" accept="image/*">
+                    <div class="file-upload" id="profilePhotoUploadZone" style="position: relative; overflow: hidden;">
+                        <span id="profilePhotoText">Glissez votre photo ici ou cliquez</span>
+                        <img id="profilePhotoPreview" src="" alt="Aperçu" style="display: none; width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; border-radius: 8px;">
+                        <input type="file" id="regProfilePhoto" accept="image/*" style="opacity: 0; position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: pointer; z-index: 2;">
                     </div>
                 </div>
                 <div class="form-group">
@@ -451,6 +452,9 @@
                 <div id="userLoginError" class="hidden" style="color: #e74c3c; font-size: 0.9rem; margin-bottom: 15px; text-align: center; background: rgba(231, 76, 60, 0.1); padding: 10px; border-radius: 6px;">Identifiants incorrects.</div>
                 
                 <button type="submit" class="btn btn-primary full-width" style="margin-top: 10px;"><span class="btn-bg"></span><span class="btn-text">Se connecter</span></button>
+                <div style="text-align: center; margin-top: 15px;">
+                    <a href="#" id="switchToClientRegBtn" style="font-size: 0.85rem; color: var(--color-primary-light); text-decoration: none; font-weight: 600;">Pas de compte ? S'inscrire gratuitement</a>
+                </div>
             </form>
         </div>
     </div>
@@ -468,8 +472,8 @@
                     <input type="text" id="clientRegName" class="admin-input" placeholder="Ex: Jean Dupont" required style="width: 100%; padding: 12px; border: 1px solid rgba(26, 86, 123, 0.2); border-radius: 8px;">
                 </div>
                 <div class="form-group" style="margin-top: 15px;">
-                    <label>Adresse complète (Quartier, Ville)</label>
-                    <input type="text" id="clientRegAddress" class="admin-input" placeholder="Ex: Almadies, Dakar" required style="width: 100%; padding: 12px; border: 1px solid rgba(26, 86, 123, 0.2); border-radius: 8px;">
+                    <label>Adresse E-mail</label>
+                    <input type="email" id="clientRegEmail" class="admin-input" placeholder="Ex: jean.dupont@gmail.com" required style="width: 100%; padding: 12px; border: 1px solid rgba(26, 86, 123, 0.2); border-radius: 8px;">
                 </div>
                 <div class="form-group" style="margin-top: 15px;">
                     <label>Numéro de Téléphone</label>

@@ -123,11 +123,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (standardAudioLock) standardAudioLock.style.display = 'block';
     }
 
-    // Update Initials in Avatar
+    // Update Initials or Profile Photo in Avatar
     const avatarImg = document.getElementById('artisanAvatar');
     if (avatarImg && currentWorker.name) {
-        const nameUrl = encodeURIComponent(currentWorker.name);
-        avatarImg.src = `https://ui-avatars.com/api/?name=${nameUrl}&background=0F5A4D&color=fff`;
+        if (currentWorker.profilePhoto && currentWorker.profilePhoto.trim() !== '') {
+            avatarImg.src = currentWorker.profilePhoto;
+        } else {
+            const nameUrl = encodeURIComponent(currentWorker.name);
+            avatarImg.src = `https://ui-avatars.com/api/?name=${nameUrl}&background=0F5A4D&color=fff`;
+        }
     }
 
     // --- Load Reviews Logic ---

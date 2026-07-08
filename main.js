@@ -146,6 +146,30 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
+        // Profile photo preview
+        const regProfilePhoto = document.getElementById('regProfilePhoto');
+        const profilePhotoPreview = document.getElementById('profilePhotoPreview');
+        const profilePhotoText = document.getElementById('profilePhotoText');
+
+        if (regProfilePhoto && profilePhotoPreview && profilePhotoText) {
+            regProfilePhoto.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        profilePhotoPreview.src = e.target.result;
+                        profilePhotoPreview.style.display = 'block';
+                        profilePhotoText.style.display = 'none';
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    profilePhotoPreview.src = '';
+                    profilePhotoPreview.style.display = 'none';
+                    profilePhotoText.style.display = 'block';
+                }
+            });
+        }
+
         // --- Legal and CGU Modals ---
         const openLegalModalBtn = document.getElementById('openLegalModalBtn');
         const legalModal = document.getElementById('legalModal');
@@ -355,6 +379,15 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
         
+        const switchToClientRegBtn = document.getElementById('switchToClientRegBtn');
+        if (switchToClientRegBtn) {
+            switchToClientRegBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (userLoginModal) userLoginModal.classList.remove('active');
+                clientRegistrationModal.classList.add('active');
+            });
+        }
+        
         if (clientRegistrationForm) {
             clientRegistrationForm.addEventListener('submit', (e) => {
                 e.preventDefault();
@@ -362,7 +395,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     id: Date.now(),
                     name: document.getElementById('clientRegName').value.trim(),
                     contact: document.getElementById('clientRegPhone').value.trim(),
-                    address: document.getElementById('clientRegAddress').value.trim(),
+                    email: document.getElementById('clientRegEmail').value.trim(),
                     password: document.getElementById('clientRegPass').value,
                     role: 'Client',
                     status: 'Actif',
@@ -563,6 +596,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     longitude: regLongitude.value,
                     description: document.getElementById('regDescription') ? document.getElementById('regDescription').value : '',
                     audioDescription: currentAudioBase64,
+                    profilePhoto: document.getElementById('profilePhotoPreview') ? document.getElementById('profilePhotoPreview').src : '',
                     plan: selectedPlan,
                     price: planPrice,
                     status: 'Actif',
