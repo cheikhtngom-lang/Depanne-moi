@@ -534,6 +534,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     paymentProcessing.style.display = 'block';
                     paymentStatusText.textContent = `Initialisation du paiement via ${provider}...`;
                     
+                    // IMPORTANT : Ouvrir la fenêtre avant le 'await' pour éviter le blocage des pop-ups par le navigateur
+                    const paymentWindow = window.open('about:blank', '_blank');
+                    if (paymentWindow) {
+                        paymentWindow.document.write("<body style='font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f4f6f8;'><h2>Chargement de la page de paiement sécurisée...</h2></body>");
+                    } else {
+                        alert("⚠️ Votre navigateur a bloqué l'ouverture de la page de paiement. Veuillez autoriser les pop-ups pour ce site.");
+                    }
+                    
                     try {
                         const response = await fetch('http://localhost:5000/api/payments/initiate', {
                             method: 'POST',
@@ -552,8 +560,12 @@ document.addEventListener("DOMContentLoaded", () => {
                         if (response.ok && data.success) {
                             paymentStatusText.textContent = "Paiement en cours dans la nouvelle fenêtre...";
                             
-                            // Ouvrir la page de paiement dans un nouvel onglet
-                            window.open(data.paymentUrl, '_blank');
+                            // Rediriger la fenêtre pré-ouverte vers l'URL de paiement
+                            if (paymentWindow) {
+                                paymentWindow.location.href = data.paymentUrl;
+                            } else {
+                                window.open(data.paymentUrl, '_blank'); // Tentative de secours
+                            }
                             
                             // Démarrer la vérification régulière (polling) du statut du paiement
                             let pollCount = 0;
@@ -570,8 +582,10 @@ document.addEventListener("DOMContentLoaded", () => {
                                             workers.push(pendingWorkerData);
                                             localStorage.setItem('depanne_workers', JSON.stringify(workers));
                                             
-                                            alert("Paiement réussi ! Votre abonnement est activé.");
-                                            window.open(`facture.html?id=${pendingWorkerData.id}`, '_blank');
+                                            alert("Paiement réussi ! Votre abonnement est activé. Vous allez être redirigé vers votre reçu.");
+                                            
+                                            // Utiliser window.location.href au lieu de window.open pour éviter le blocage des pop-ups
+                                            window.location.href = `facture.html?id=${pendingWorkerData.id}`;
                                             
                                             workerForm.reset();
                                             paymentModal.classList.remove('active');
@@ -606,6 +620,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             }, 2000); // Vérifier toutes les 2 secondes
 
                         } else {
+                            if (paymentWindow) paymentWindow.close();
                             paymentStatusText.textContent = data.error || "Erreur d'initialisation.";
                             paymentStatusText.style.color = "red";
                             setTimeout(() => {
@@ -615,6 +630,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             }, 3000);
                         }
                     } catch (error) {
+                        if (paymentWindow) paymentWindow.close();
                         console.error('Erreur API Paiement:', error);
                         paymentStatusText.textContent = "Serveur inaccessible.";
                         paymentStatusText.style.color = "red";

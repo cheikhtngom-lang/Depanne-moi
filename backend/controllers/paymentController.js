@@ -212,7 +212,7 @@ exports.processMockCheckout = async (req, res) => {
             <html>
                 <body style="font-family: sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; background: #f4f6f8; margin: 0; text-align: center;">
                     <h2 style="color: ${status === 'Success' ? '#2ecc71' : '#e74c3c'}; font-size: 2rem;">
-                        ${status === 'Success' ? '✅ Paiement simulé avec succès !' : '❌ Simulation d\\'échec enregistrée !'}
+                        ${status === 'Success' ? '✅ Paiement simulé avec succès !' : "❌ Simulation d'échec enregistrée !"}
                     </h2>
                     <p style="color: #7f8c8d; font-size: 1.1rem;">Vous pouvez fermer cet onglet et retourner sur le site principal.</p>
                     <script>
