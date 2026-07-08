@@ -449,6 +449,42 @@ document.addEventListener("DOMContentLoaded", () => {
             const paymentProcessing = document.getElementById('paymentProcessing');
             const paymentStatusText = document.getElementById('paymentStatusText');
 
+            // Geolocation Logic
+            const getLocationBtn = document.getElementById('getLocationBtn');
+            const getLocationBtnText = document.getElementById('getLocationBtnText');
+            const regLatitude = document.getElementById('regLatitude');
+            const regLongitude = document.getElementById('regLongitude');
+            const locationStatus = document.getElementById('locationStatus');
+
+            if (getLocationBtn) {
+                getLocationBtn.addEventListener('click', () => {
+                    if ("geolocation" in navigator) {
+                        getLocationBtnText.textContent = "Recherche en cours...";
+                        navigator.geolocation.getCurrentPosition((position) => {
+                            regLatitude.value = position.coords.latitude;
+                            regLongitude.value = position.coords.longitude;
+                            
+                            getLocationBtn.style.background = "rgba(46, 204, 113, 0.2)";
+                            getLocationBtn.style.borderColor = "#2ecc71";
+                            getLocationBtnText.textContent = "✅ Position GPS validée";
+                            getLocationBtnText.style.color = "#2ecc71";
+                            
+                            locationStatus.style.display = 'block';
+                            locationStatus.style.color = '#2ecc71';
+                            locationStatus.textContent = `Coordonnées enregistrées avec succès.`;
+                        }, (error) => {
+                            console.error("Erreur GPS:", error);
+                            getLocationBtnText.textContent = "📍 Réessayer";
+                            locationStatus.style.display = 'block';
+                            locationStatus.style.color = '#e74c3c';
+                            locationStatus.textContent = "Accès refusé ou impossible. Veuillez autoriser la localisation.";
+                        });
+                    } else {
+                        alert("La géolocalisation n'est pas supportée par votre navigateur.");
+                    }
+                });
+            }
+
             workerForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 
@@ -465,6 +501,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     planPrice = 0;
                 }
 
+                // Validation de la localisation GPS (Obligatoire)
+                if (!regLatitude.value || !regLongitude.value) {
+                    alert("⚠️ Veuillez partager votre position GPS en cliquant sur le bouton 'Partager ma position GPS actuelle' pour pouvoir être trouvé par les clients.");
+                    return; // Stoppe la soumission
+                }
+
                 pendingWorkerData = {
                     id: Date.now(),
                     name: document.getElementById('regName').value,
@@ -472,6 +514,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     phone: document.getElementById('regPhone').value,
                     job: document.getElementById('regJob').value,
                     zone: `${document.getElementById('regRegion').value} / ${document.getElementById('regArea').value}`,
+                    latitude: regLatitude.value,
+                    longitude: regLongitude.value,
                     description: document.getElementById('regDescription') ? document.getElementById('regDescription').value : '',
                     audioDescription: currentAudioBase64,
                     plan: selectedPlan,
@@ -807,7 +851,10 @@ document.addEventListener("DOMContentLoaded", () => {
                             <div class="glass-panel" style="padding: 15px 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; animation: fadeIn 0.4s ease; background: rgba(255,255,255,0.85);">
                                 <div style="text-align: left;">
                                     <h4 style="margin-bottom: 5px; color: var(--color-primary); font-family: var(--font-heading); font-size: 1.1rem;">${w.name}</h4>
-                                    <p style="font-size: 0.85rem; color: var(--color-text-light);">🛠 ${w.job} • 📍 ${w.zone}</p>
+                                    <p style="font-size: 0.85rem; color: var(--color-text-light); margin-bottom: 5px;">🛠 ${w.job} • 📍 ${w.zone}</p>
+                                    <div class="distance-badge" data-lat="${w.latitude || ''}" data-lng="${w.longitude || ''}" style="display: inline-block; font-size: 0.8rem; background: rgba(0,0,0,0.05); padding: 3px 8px; border-radius: 4px; color: #555;">
+                                        ${w.latitude ? '📍 Distance en calcul...' : '📍 Position exacte non renseignée'}
+                                    </div>
                                 </div>
                                 <div style="text-align: right;">
                                     <span style="${badgeStyle}">${w.plan}</span><br>
@@ -824,6 +871,46 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 searchResultsModal.classList.add('active');
                 document.body.style.overflow = 'hidden';
+                
+                // Calcul de distance si le visiteur autorise la localisation
+                if ("geolocation" in navigator) {
+                    navigator.geolocation.getCurrentPosition((position) => {
+                        const visitorLat = position.coords.latitude;
+                        const visitorLng = position.coords.longitude;
+                        
+                        const distanceBadges = document.querySelectorAll('.distance-badge');
+                        distanceBadges.forEach(badge => {
+                            const artisanLat = parseFloat(badge.getAttribute('data-lat'));
+                            const artisanLng = parseFloat(badge.getAttribute('data-lng'));
+                            
+                            if (artisanLat && artisanLng) {
+                                // Formule de Haversine
+                                const R = 6371; // Rayon de la terre en km
+                                const dLat = (artisanLat - visitorLat) * Math.PI / 180;
+                                const dLon = (artisanLng - visitorLng) * Math.PI / 180;
+                                const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                                          Math.cos(visitorLat * Math.PI / 180) * Math.cos(artisanLat * Math.PI / 180) * 
+                                          Math.sin(dLon/2) * Math.sin(dLon/2);
+                                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                                const distanceKm = (R * c).toFixed(1);
+                                
+                                // Estimation du temps (vitesse moyenne en ville : 30 km/h)
+                                const timeMin = Math.round((distanceKm / 30) * 60);
+                                
+                                badge.innerHTML = `<span style="color: #2ecc71; font-weight: bold;">📍 À ${distanceKm} km</span> (env. ${timeMin} min en voiture)`;
+                                badge.style.background = 'rgba(46, 204, 113, 0.1)';
+                            }
+                        });
+                    }, (error) => {
+                        console.warn("Localisation visiteur refusée ou indisponible.");
+                        const distanceBadges = document.querySelectorAll('.distance-badge');
+                        distanceBadges.forEach(badge => {
+                            if (badge.getAttribute('data-lat')) {
+                                badge.innerHTML = `📍 Autorisez la localisation pour voir la distance`;
+                            }
+                        });
+                    });
+                }
                 
                 // Attacher les écouteurs pour l'interception de contact
                 const solicitBtns = document.querySelectorAll('.solicit-worker-btn');
