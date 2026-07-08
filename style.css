@@ -741,7 +741,8 @@ a:not(.btn):hover {
     margin-top: 10px;
 }
 
-/* Responsive Mobile First */
+/* Reset et variables de base */
+/* Trigger Vercel update */
 @media (max-width: 900px) {
     .pricing-grid { grid-template-columns: 1fr; }
     .premium-card { transform: scale(1); }
