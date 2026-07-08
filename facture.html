@@ -54,7 +54,7 @@
         <!-- Top Section -->
         <div class="top-section">
             <div class="logo-container">
-                <img src="file:///C:/Users/SEGEASA/Downloads/Bustane.png" alt="Bustane Logo" style="max-height: 50px;">
+                <img src="./Bustane.png" alt="Logo Dépanne-Moi" style="max-height: 50px;">
             </div>
             <div class="company-info">
                 <p class="date" id="invDateTop"></p>
@@ -172,10 +172,10 @@
                 return;
             }
 
-            // Calculs
-            const subtotal = parseInt(worker.price) || 0;
-            const tva = Math.round(subtotal * 0.18);
-            const total = subtotal + tva;
+            // Calculs (TVA Incluse dans le total)
+            const total = parseInt(worker.price) || 0;
+            const tva = Math.round(total * 0.18);
+            const subtotal = total - tva;
             const dateStr = worker.date || new Date().toLocaleDateString('fr-FR');
             
             // Format FCFA

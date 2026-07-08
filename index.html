@@ -227,9 +227,9 @@
                 <p>La nouvelle norme du dépannage premium.</p>
             </div>
             <div class="footer-links">
-                <a href="#">Mentions légales</a>
-                <a href="#">Conditions générales</a>
-                <a href="#">Contact</a>
+                <a href="#" id="openLegalModalBtn">Mentions légales</a>
+                <a href="#" id="openTermsModalBtn">Conditions générales</a>
+                <a href="mailto:contact@depannemoi.sn">Contact</a>
             </div>
         </div>
     </footer>
@@ -471,6 +471,57 @@
                 
                 <button type="submit" class="btn btn-primary full-width" style="margin-top: 25px;"><span class="btn-bg"></span><span class="btn-text">Envoyer mon avis</span></button>
             </form>
+        </div>
+    </div>
+
+    <!-- Legal Mentions Modal -->
+    <div class="modal-overlay" id="legalModal">
+        <div class="modal-content glass-card" style="max-width: 600px; text-align: left; max-height: 80vh; overflow-y: auto;">
+            <button class="modal-close" id="closeLegalModalBtn">&times;</button>
+            <h2 style="color: var(--color-primary); margin-bottom: 20px; font-size: 1.8rem;">Mentions Légales</h2>
+            
+            <div style="color: var(--color-text); font-size: 0.95rem; line-height: 1.6;">
+                <h3 style="color: var(--color-primary-light); margin-top: 15px; margin-bottom: 5px;">1. Éditeur de la plateforme</h3>
+                <p>Le site "Dépanne-Moi" est édité par la société <strong>Dépanne-Moi SN</strong>, Société à Responsabilité Limitée (SARL) au capital de 1 000 000 FCFA, dont le siège social est situé à Dakar, Sénégal.</p>
+                <p>NINEA : 000000000</p>
+                <p>Email : contact@depannemoi.sn | Téléphone : +221 33 854 10 98</p>
+                
+                <h3 style="color: var(--color-primary-light); margin-top: 15px; margin-bottom: 5px;">2. Directeur de la publication</h3>
+                <p>Le Directeur de la publication est M. [Nom du fondateur], en sa qualité de Gérant.</p>
+                
+                <h3 style="color: var(--color-primary-light); margin-top: 15px; margin-bottom: 5px;">3. Hébergement</h3>
+                <p>Ce site est hébergé par [Nom de l'hébergeur], situé à [Adresse de l'hébergeur].</p>
+                
+                <h3 style="color: var(--color-primary-light); margin-top: 15px; margin-bottom: 5px;">4. Propriété intellectuelle</h3>
+                <p>L'ensemble du contenu (textes, images, code, design) de la plateforme est protégé par les lois sur la propriété intellectuelle en vigueur au Sénégal. Toute reproduction est interdite sans autorisation préalable.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms and Conditions Modal -->
+    <div class="modal-overlay" id="termsModal">
+        <div class="modal-content glass-card" style="max-width: 600px; text-align: left; max-height: 80vh; overflow-y: auto;">
+            <button class="modal-close" id="closeTermsModalBtn">&times;</button>
+            <h2 style="color: var(--color-primary); margin-bottom: 20px; font-size: 1.8rem;">Conditions Générales (CGU/CGV)</h2>
+            
+            <div style="color: var(--color-text); font-size: 0.95rem; line-height: 1.6;">
+                <h3 style="color: var(--color-primary-light); margin-top: 15px; margin-bottom: 5px;">1. Objet de la plateforme</h3>
+                <p>"Dépanne-Moi" agit comme un intermédiaire mettant en relation des clients avec des artisans qualifiés (plombiers, électriciens, etc.) au Sénégal. Nous ne sommes pas l'employeur de ces artisans.</p>
+                
+                <h3 style="color: var(--color-primary-light); margin-top: 15px; margin-bottom: 5px;">2. Inscription et Abonnements</h3>
+                <p>L'inscription pour les clients est gratuite. Pour les artisans, nous proposons une période d'essai gratuite suivie de formules d'abonnement :</p>
+                <ul>
+                    <li><strong>Standard</strong> : 5 000 FCFA / mois (TVA 18% incluse)</li>
+                    <li><strong>Premium</strong> : 8 990 FCFA / mois (TVA 18% incluse, visibilité maximale)</li>
+                </ul>
+                <p>Le paiement s'effectue via des solutions de mobile money sécurisées (Wave, Orange Money).</p>
+                
+                <h3 style="color: var(--color-primary-light); margin-top: 15px; margin-bottom: 5px;">3. Responsabilités</h3>
+                <p>Dépanne-Moi s'engage à vérifier l'identité des artisans inscrits. Toutefois, la responsabilité des travaux effectués incombe exclusivement à l'artisan. Dépanne-Moi décline toute responsabilité en cas de litige suite à une intervention.</p>
+                
+                <h3 style="color: var(--color-primary-light); margin-top: 15px; margin-bottom: 5px;">4. Données personnelles</h3>
+                <p>Les données collectées (nom, localisation, téléphone) sont utilisées uniquement pour le fonctionnement de la plateforme. Conformément à la législation CDP au Sénégal, vous disposez d'un droit d'accès, de modification et de suppression de vos données.</p>
+            </div>
         </div>
     </div>
 

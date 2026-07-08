@@ -198,10 +198,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 
                 // Nettoyage du numéro de téléphone (conserve uniquement les chiffres)
                 const phoneClean = w.phone ? w.phone.replace(/[^0-9]/g, '') : '';
-                // Message de facturation WhatsApp
-                const subtotal = w.price || 0;
-                const tva = Math.round(subtotal * 0.18);
-                const total = subtotal + tva;
+                // Message de facturation WhatsApp (TVA Incluse dans le total)
+                const total = parseInt(w.price) || 0;
+                const tva = Math.round(total * 0.18);
+                const subtotal = total - tva;
                 const invoiceDate = w.date || new Date().toLocaleDateString('fr-FR');
                 const waMessage = `*Facture Bustane*\n\n*N° Facture :* INV-${w.id}\n*Date :* ${invoiceDate}\n\n*Facturé à :*\n${w.name}\nDakar, Sénégal\n\n*Détails :*\nAbonnement : Formule ${w.plan}\nDurée : 1 Mois\n\n*Résumé :*\nSous-total : ${subtotal} FCFA\nTVA (18%) : ${tva} FCFA\n*Total : ${total} FCFA*\n\n_Merci de votre confiance._`;
 

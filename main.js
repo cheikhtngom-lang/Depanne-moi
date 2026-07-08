@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     // --------------------------------------------------------------------
 
+
     // --- Gestion de l'état de connexion UI ---
     const updateAuthUI = () => {
         const isClientLoggedIn = sessionStorage.getItem('client_logged_in') === 'true';
@@ -518,25 +519,111 @@ document.addEventListener("DOMContentLoaded", () => {
                 const payWaveBtn = document.getElementById('payWaveBtn');
                 const payOmBtn = document.getElementById('payOmBtn');
 
-                const processPayment = (provider) => {
+                const processPayment = async (provider) => {
                     if (pendingWorkerData) {
                         pendingWorkerData.paymentMethod = provider;
                         
                         // Simulation d'une IP et récupération de la zone
                         const fakeIp = `102.164.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
                         pendingWorkerData.ipLocation = `${fakeIp} - ${pendingWorkerData.zone || 'Localisation inconnue'}`;
+                        
+                        // Sauvegarder les données temporaires dans sessionStorage pour les retrouver après la redirection
+                        sessionStorage.setItem('pendingWorkerData', JSON.stringify(pendingWorkerData));
                     }
                     paymentOptions.style.display = 'none';
                     paymentProcessing.style.display = 'block';
-                    paymentStatusText.textContent = `Veuillez valider le paiement sur votre application ${provider}...`;
+                    paymentStatusText.textContent = `Initialisation du paiement via ${provider}...`;
                     
-                    // Simuler attente du client
-                    setTimeout(() => {
-                        paymentStatusText.textContent = "Paiement reçu ! Activation...";
+                    try {
+                        const response = await fetch('http://localhost:5000/api/payments/initiate', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                userId: pendingWorkerData.name || 'Inconnu',
+                                amount: pendingWorkerData.price || 5000,
+                                provider: provider,
+                                planType: pendingWorkerData.plan || 'Standard',
+                                returnUrl: window.location.href.split('?')[0] // Envoyer l'URL courante exacte sans paramètres
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (response.ok && data.success) {
+                            paymentStatusText.textContent = "Paiement en cours dans la nouvelle fenêtre...";
+                            
+                            // Ouvrir la page de paiement dans un nouvel onglet
+                            window.open(data.paymentUrl, '_blank');
+                            
+                            // Démarrer la vérification régulière (polling) du statut du paiement
+                            let pollCount = 0;
+                            const pollInterval = setInterval(async () => {
+                                try {
+                                    const statusRes = await fetch(`http://localhost:5000/api/payments/status/${data.paymentId}`);
+                                    const statusData = await statusRes.json();
+                                    
+                                    if (statusData.status === 'Success') {
+                                        clearInterval(pollInterval);
+                                        paymentStatusText.textContent = "Paiement validé ! Activation...";
+                                        setTimeout(() => {
+                                            let workers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
+                                            workers.push(pendingWorkerData);
+                                            localStorage.setItem('depanne_workers', JSON.stringify(workers));
+                                            
+                                            alert("Paiement réussi ! Votre abonnement est activé.");
+                                            window.open(`facture.html?id=${pendingWorkerData.id}`, '_blank');
+                                            
+                                            workerForm.reset();
+                                            paymentModal.classList.remove('active');
+                                            registrationModal.classList.remove('active');
+                                            document.body.style.overflow = '';
+                                        }, 1000);
+                                    } else if (statusData.status === 'Failed') {
+                                        clearInterval(pollInterval);
+                                        paymentStatusText.textContent = "Le paiement a échoué.";
+                                        paymentStatusText.style.color = "red";
+                                        setTimeout(() => {
+                                            paymentOptions.style.display = 'flex';
+                                            paymentProcessing.style.display = 'none';
+                                            paymentStatusText.style.color = "var(--color-primary)";
+                                        }, 3000);
+                                    }
+                                    
+                                    pollCount++;
+                                    if (pollCount > 60) { // Timeout après 2 minutes (60 * 2s)
+                                        clearInterval(pollInterval);
+                                        paymentStatusText.textContent = "Délai d'attente dépassé.";
+                                        paymentStatusText.style.color = "red";
+                                        setTimeout(() => {
+                                            paymentOptions.style.display = 'flex';
+                                            paymentProcessing.style.display = 'none';
+                                            paymentStatusText.style.color = "var(--color-primary)";
+                                        }, 3000);
+                                    }
+                                } catch (e) {
+                                    console.error("Erreur de vérification du statut", e);
+                                }
+                            }, 2000); // Vérifier toutes les 2 secondes
+
+                        } else {
+                            paymentStatusText.textContent = data.error || "Erreur d'initialisation.";
+                            paymentStatusText.style.color = "red";
+                            setTimeout(() => {
+                                paymentOptions.style.display = 'flex';
+                                paymentProcessing.style.display = 'none';
+                                paymentStatusText.style.color = "var(--color-primary)";
+                            }, 3000);
+                        }
+                    } catch (error) {
+                        console.error('Erreur API Paiement:', error);
+                        paymentStatusText.textContent = "Serveur inaccessible.";
+                        paymentStatusText.style.color = "red";
                         setTimeout(() => {
-                            finalizeRegistration(`Paiement ${provider} réussi ! Votre abonnement est activé.`);
-                        }, 1000);
-                    }, 2500);
+                            paymentOptions.style.display = 'flex';
+                            paymentProcessing.style.display = 'none';
+                            paymentStatusText.style.color = "var(--color-primary)";
+                        }, 3000);
+                    }
                 };
 
                 if (payWaveBtn) payWaveBtn.addEventListener('click', () => processPayment('Wave'));
@@ -955,6 +1042,42 @@ document.addEventListener("DOMContentLoaded", () => {
                 ratingText.textContent = "Veuillez donner une note";
                 ratingText.style.color = 'var(--color-text-light)';
             }
+        });
+    }
+
+    // --- Footer Modals Logic ---
+    const openLegalBtn = document.getElementById('openLegalModalBtn');
+    const openTermsBtn = document.getElementById('openTermsModalBtn');
+    const legalModal = document.getElementById('legalModal');
+    const termsModal = document.getElementById('termsModal');
+    const closeLegalBtn = document.getElementById('closeLegalModalBtn');
+    const closeTermsBtn = document.getElementById('closeTermsModalBtn');
+
+    if (openLegalBtn && legalModal) {
+        openLegalBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            legalModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+    }
+    if (closeLegalBtn && legalModal) {
+        closeLegalBtn.addEventListener('click', () => {
+            legalModal.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+    }
+
+    if (openTermsBtn && termsModal) {
+        openTermsBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            termsModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+    }
+    if (closeTermsBtn && termsModal) {
+        closeTermsBtn.addEventListener('click', () => {
+            termsModal.classList.remove('active');
+            document.body.style.overflow = '';
         });
     }
 });

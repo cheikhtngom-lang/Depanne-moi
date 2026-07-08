@@ -63,12 +63,26 @@
     <div class="admin-layout" id="adminDashboard" style="display: none;">
         <!-- Sidebar -->
         <aside class="sidebar glass-panel">
-            <div class="sidebar-header">
-                <a href="index.html" class="logo">Dépanne<span>Moi</span> <br><small>Admin</small></a>
+            <div class="sidebar-header" style="text-align: center;">
+                <a href="index.html" style="display: inline-block; margin-bottom: 10px;">
+                    <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="url(#logo-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 4px 6px rgba(26, 86, 123, 0.3)); transition: transform 0.3s ease;" onmouseover="this.style.transform='rotate(-15deg) scale(1.1)'" onmouseout="this.style.transform='rotate(0deg) scale(1)'">
+                        <defs>
+                            <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#1A567B" />
+                                <stop offset="100%" stop-color="#3A86FF" />
+                            </linearGradient>
+                        </defs>
+                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                    </svg>
+                </a>
+                <a href="index.html" class="logo" style="display: block;">Dépanne<span>Moi</span> <br><small>Admin</small></a>
             </div>
             <nav class="sidebar-nav">
                 <a href="#" class="nav-item active" data-target="dashboard-view">
                     <span class="icon">📊</span> Vue d'ensemble
+                </a>
+                <a href="#" class="nav-item" data-target="analytics-view">
+                    <span class="icon">📈</span> Analytique
                 </a>
                 <a href="#" class="nav-item" data-target="users-view">
                     <span class="icon">👥</span> Utilisateurs
@@ -176,37 +190,7 @@
                         </div>
                     </div>
 
-                    <!-- Charts Header with Filter -->
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px; margin-bottom: 10px;">
-                        <h3 style="color: var(--color-primary); margin: 0; font-size: 1.2rem;">Analyse des performances</h3>
-                        <div class="segmented-control" id="chartTimeFilter">
-                            <button data-value="jour">Auj.</button>
-                            <button data-value="semaine" class="active">Semaine</button>
-                            <button data-value="mois">Mois</button>
-                            <button data-value="trimestre">Trim.</button>
-                            <button data-value="annee">Année</button>
-                        </div>
-                    </div>
 
-                    <!-- Charts Grid -->
-                    <div class="charts-grid">
-                        <div class="chart-container glass-panel">
-                            <h3 class="chart-title">Demandes par Région</h3>
-                            <canvas id="regionChart"></canvas>
-                        </div>
-                        <div class="chart-container glass-panel">
-                            <h3 class="chart-title">Professions Sollicitées</h3>
-                            <canvas id="jobChart"></canvas>
-                        </div>
-                        <div class="chart-container glass-panel">
-                            <h3 class="chart-title">Fréquence du site (Visites)</h3>
-                            <canvas id="trafficChart"></canvas>
-                        </div>
-                        <div class="chart-container glass-panel">
-                            <h3 class="chart-title">Taux d'appels / Contacts</h3>
-                            <canvas id="conversionChart"></canvas>
-                        </div>
-                    </div>
 
                     <!-- Workers Table -->
                     <div class="glass-panel" style="padding: 20px;">
@@ -248,6 +232,67 @@
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Analytics View -->
+                <section id="analytics-view" class="view-section">
+                    <h2 class="view-title">Analytique & Performances</h2>
+                    
+                    <div class="stats-grid" style="margin-bottom: 20px;">
+                        <div class="stat-card glass-panel" style="padding: 15px 25px;">
+                            <div class="stat-icon" style="background: rgba(155, 89, 182, 0.1); color: #9b59b6; width: 45px; height: 45px; font-size: 1.2rem;">📈</div>
+                            <div class="stat-details">
+                                <h3 style="margin-bottom: 4px;">Croissance Utilisateurs</h3>
+                                <p class="value" style="font-size: 1.5rem;">+24%</p>
+                            </div>
+                        </div>
+                        <div class="stat-card glass-panel" style="padding: 15px 25px;">
+                            <div class="stat-icon" style="background: rgba(231, 76, 60, 0.1); color: #e74c3c; width: 45px; height: 45px; font-size: 1.2rem;">⏱️</div>
+                            <div class="stat-details">
+                                <h3 style="margin-bottom: 4px;">Temps Moyen Rép.</h3>
+                                <p class="value" style="font-size: 1.5rem;">12 min</p>
+                            </div>
+                        </div>
+                        <div class="stat-card glass-panel" style="padding: 15px 25px;">
+                            <div class="stat-icon" style="background: rgba(52, 73, 94, 0.1); color: #34495e; width: 45px; height: 45px; font-size: 1.2rem;">⭐</div>
+                            <div class="stat-details">
+                                <h3 style="margin-bottom: 4px;">Satisfaction Globale</h3>
+                                <p class="value" style="font-size: 1.5rem;">4.8/5</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Header with Filter -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px; margin-bottom: 10px;">
+                        <h3 style="color: var(--color-primary); margin: 0; font-size: 1.2rem;">Analyse des performances</h3>
+                        <div class="segmented-control" id="chartTimeFilter">
+                            <button data-value="jour">Auj.</button>
+                            <button data-value="semaine" class="active">Semaine</button>
+                            <button data-value="mois">Mois</button>
+                            <button data-value="trimestre">Trim.</button>
+                            <button data-value="annee">Année</button>
+                        </div>
+                    </div>
+
+                    <!-- Charts Grid -->
+                    <div class="charts-grid">
+                        <div class="chart-container glass-panel">
+                            <h3 class="chart-title">Demandes par Région</h3>
+                            <canvas id="regionChart"></canvas>
+                        </div>
+                        <div class="chart-container glass-panel">
+                            <h3 class="chart-title">Professions Sollicitées</h3>
+                            <canvas id="jobChart"></canvas>
+                        </div>
+                        <div class="chart-container glass-panel">
+                            <h3 class="chart-title">Fréquence du site (Visites)</h3>
+                            <canvas id="trafficChart"></canvas>
+                        </div>
+                        <div class="chart-container glass-panel">
+                            <h3 class="chart-title">Taux d'appels / Contacts</h3>
+                            <canvas id="conversionChart"></canvas>
                         </div>
                     </div>
                 </section>
