@@ -9,7 +9,7 @@ git add .
 
 echo.
 echo [2/3] Creation du commit (sauvegarde locale)...
-git commit -m "feat: ajout du logo sur facture et correction calcul TVA incluse"
+git commit -m "fix: correction des popups bloques et syntaxe serveur"
 
 echo.
 echo [3/3] Envoi des modifications vers GitHub...
