@@ -803,10 +803,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (userForm) {
-        userForm.addEventListener('submit', (e) => {
+        userForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const idInput = document.getElementById('userIdInput').value;
-            const users = JSON.parse(localStorage.getItem('depanne_users')) || [];
             
             const userData = {
                 name: document.getElementById('userNameInput').value,
@@ -819,23 +818,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (idInput) {
                 // Modification
-                const index = users.findIndex(u => u.id.toString() === idInput);
-                if (index !== -1) {
-                    users[index].name = userData.name;
-                    users[index].contact = userData.contact;
-                    users[index].role = userData.role;
-                    users[index].status = userData.status;
-                    if (pass) users[index].password = pass; // Update pass only if filled
+                if (pass) userData.password = pass; // Update pass only if filled
+                const { error } = await window.db.from('users').update(userData).eq('id', idInput);
+                if (error) {
+                    console.error(error);
+                    alert("Erreur lors de la modification.");
+                    return;
                 }
             } else {
                 // Création
-                userData.id = Date.now();
                 userData.password = pass;
                 userData.dateJoined = new Date().toLocaleDateString('fr-FR');
-                users.push(userData);
+                const { error } = await window.db.from('users').insert([userData]);
+                if (error) {
+                    console.error(error);
+                    alert("Erreur lors de la création.");
+                    return;
+                }
             }
 
-            localStorage.setItem('depanne_users', JSON.stringify(users));
             renderUsersTable();
             closeUserModalBtn.click();
         });
@@ -843,10 +844,12 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Fonctions Globales pour les boutons (Éditer, Bloquer, Supprimer)
-window.editUser = function(id) {
-    const users = JSON.parse(localStorage.getItem('depanne_users')) || [];
-    const user = users.find(u => u.id === id);
-    if (!user) return;
+window.editUser = async function(id) {
+    const { data: user, error } = await window.db.from('users').select('*').eq('id', id).single();
+    if (error || !user) {
+        alert("Impossible de charger l'utilisateur.");
+        return;
+    }
 
     document.getElementById('userModalTitle').textContent = "Modifier l'Utilisateur";
     document.getElementById('userIdInput').value = user.id;

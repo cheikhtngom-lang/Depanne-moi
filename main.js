@@ -790,8 +790,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 submitBtn.style.opacity = '0.8';
 
                 try {
-                    // Recherche par nom OU téléphone
-                    const { data: workers, error } = await window.db
+                    // 1. Chercher d'abord dans les artisans (workers)
+                    let isWorker = true;
+                    let { data: accountList, error } = await window.db
                         .from('workers')
                         .select('id, password')
                         .or(`phone.eq.${loginInput},name.eq.${loginInput}`);
@@ -804,10 +805,27 @@ document.addEventListener("DOMContentLoaded", () => {
                         return;
                     }
 
-                    // On cherche le bon mot de passe dans les résultats
-                    const validWorker = workers.find(w => w.password === passwordInput);
+                    // 2. Si non trouvé dans les artisans, chercher dans les utilisateurs (Admins / Clients)
+                    if (!accountList || accountList.length === 0) {
+                        isWorker = false;
+                        const { data: usersList, error: err2 } = await window.db
+                            .from('users')
+                            .select('id, password, role')
+                            .or(`contact.eq.${loginInput},name.eq.${loginInput}`);
+                            
+                        if (err2) {
+                            showError("Erreur lors de la vérification.");
+                            submitBtnText.textContent = originalText;
+                            submitBtn.style.opacity = '1';
+                            return;
+                        }
+                        accountList = usersList;
+                    }
 
-                    if (!validWorker) {
+                    // On cherche le bon mot de passe dans les résultats
+                    const validAccount = (accountList || []).find(acc => acc.password === passwordInput);
+
+                    if (!validAccount) {
                         showError("Identifiant ou mot de passe incorrect.");
                         submitBtnText.textContent = originalText;
                         submitBtn.style.opacity = '1';
@@ -815,15 +833,38 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
 
                     // Succès : connexion
-                    sessionStorage.setItem('artisan_auth_token', 'true');
-                    sessionStorage.setItem('artisan_id', validWorker.id.toString());
-                    
                     if (errorMsgDiv) errorMsgDiv.style.display = 'none';
-
                     submitBtnText.textContent = "Succès !";
                     
                     setTimeout(() => {
-                        window.location.href = 'artisan.html';
+                        if (isWorker) {
+                            sessionStorage.setItem('artisan_auth_token', 'true');
+                            sessionStorage.setItem('artisan_id', validAccount.id.toString());
+                            window.location.href = 'artisan.html';
+                        } else {
+                            if (validAccount.role === 'Admin') {
+                                // Rediriger l'admin
+                                sessionStorage.setItem('admin_logged_in', 'true');
+                                window.location.href = 'admin.html';
+                            } else {
+                                // C'est un client : On reste sur la page, on change juste l'interface
+                                sessionStorage.setItem('client_auth_token', 'true');
+                                sessionStorage.setItem('client_id', validAccount.id.toString());
+                                alert("Bienvenue dans votre espace client !");
+                                
+                                const loginModal = document.getElementById('userLoginModal');
+                                if (loginModal) loginModal.classList.remove('active');
+                                document.body.style.overflow = '';
+                                
+                                const loginBtn = document.getElementById('openUserLoginModalBtn');
+                                const logoutBtn = document.getElementById('logoutClientBtn');
+                                if (loginBtn) loginBtn.style.display = 'none';
+                                if (logoutBtn) logoutBtn.style.display = 'block';
+                                
+                                submitBtnText.textContent = originalText;
+                                submitBtn.style.opacity = '1';
+                            }
+                        }
                     }, 800);
 
                 } catch (err) {
