@@ -77,7 +77,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Fill Settings Form
     if (document.getElementById('settingName')) {
-        document.getElementById('settingName').value = currentWorker.name;
+        document.getElementById('settingName').value = currentWorker.name || '';
+    }
+    if (document.getElementById('settingPhone')) {
+        document.getElementById('settingPhone').value = currentWorker.phone || '';
     }
     if (document.getElementById('settingDescription')) {
         document.getElementById('settingDescription').value = currentWorker.description || '';
@@ -274,6 +277,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         settingsForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const newName = document.getElementById('settingName').value;
+            const newPhone = document.getElementById('settingPhone') ? document.getElementById('settingPhone').value : '';
             const newDesc = document.getElementById('settingDescription') ? document.getElementById('settingDescription').value : '';
             const newPass = document.getElementById('settingPass').value;
             
@@ -286,6 +290,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Préparer les données à mettre à jour
                 let updates = {
                     name: newName,
+                    phone: newPhone,
                     description: newDesc
                 };
                 
@@ -306,6 +311,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 } else {
                     // Update UI locale
                     currentWorker.name = newName;
+                    currentWorker.phone = newPhone;
                     currentWorker.description = newDesc;
                     if (newPass) currentWorker.password = newPass;
                     
