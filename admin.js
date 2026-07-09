@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const allData = [...(dataByName || []), ...(dataByContact || [])];
                 
                 if (allData.length > 0) {
-                    validUser = allData.find(u => u.password === pass);
+                    validUser = allData.find(u => String(u.password) === String(pass));
                 }
             } catch (err) {
                 console.error("Erreur de connexion Admin:", err);

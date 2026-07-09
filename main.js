@@ -812,8 +812,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         accountList = [...(usersByName || []), ...(usersByContact || [])];
                     }
 
-                    // On cherche le bon mot de passe dans les résultats
-                    const validAccount = (accountList || []).find(acc => acc.password === passwordInput);
+                    // On cherche le bon mot de passe dans les résultats (conversion en String obligatoire si Supabase renvoie un entier)
+                    const validAccount = (accountList || []).find(acc => String(acc.password) === String(passwordInput));
 
                     if (!validAccount) {
                         showError("Identifiant ou mot de passe incorrect.");
