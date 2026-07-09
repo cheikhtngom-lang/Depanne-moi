@@ -975,6 +975,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (mainSearchBtn && searchResultsModal) {
         mainSearchBtn.addEventListener('click', async () => {
+            const isClientLoggedIn = sessionStorage.getItem('client_logged_in') === 'true';
+            
+            if (!isClientLoggedIn) {
+                // S'ils ne sont pas connectés, on ouvre la modale d'inscription client
+                const clientRegModal = document.getElementById('clientRegistrationModal');
+                if (clientRegModal) {
+                    clientRegModal.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                }
+                return; // On arrête l'exécution de la recherche
+            }
+
             const job = searchJob ? searchJob.value.trim() : '';
             const loc = searchLoc ? searchLoc.value.trim() : '';
             
