@@ -306,7 +306,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </tr>
                 `;
 
-                totalRevenue += w.price;
+                totalRevenue += parseInt(w.price) || 0;
                 if(w.plan === "Premium") premiumCount++;
             });
             
@@ -332,7 +332,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 statRevenue.textContent = new Intl.NumberFormat('fr-FR').format(totalRevenue).replace(/,/g, ' ') + " FCFA";
             }
             if (statPremiumWorkers) {
-                statPremiumWorkers.textContent = premiumCount;
+                statPremiumWorkers.textContent = safeWorkers.length;
             }
         } else {
             // Update UI with empty variables even if workers.length === 0
