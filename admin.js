@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
             // --- RATE LIMITING SUPPRIMÉ TEMPORAIREMENT ---
@@ -41,21 +41,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const user = document.getElementById('adminUser').value.trim();
             const pass = document.getElementById('adminPass').value;
-
-            // Vérification des utilisateurs dans le localStorage
-            let depanne_users = JSON.parse(localStorage.getItem('depanne_users')) || [];
             
-            const validUser = depanne_users.find(u => {
-                if (!u.name || !u.contact) return false;
-                const matchName = u.name.toLowerCase() === user.toLowerCase();
-                const matchContact = u.contact.toLowerCase() === user.toLowerCase();
-                return (matchName || matchContact) && 
-                       u.password === pass && 
-                       u.status === 'Actif' &&
-                       u.role === 'Admin';
-            });
+            // On échappe les guillemets pour éviter les erreurs de syntaxe
+            const safeUser = user.replace(/"/g, '""');
 
-            // Identifiants: admin / admin123456 (par défaut) OU utilisateur valide
+            // Vérification dans Supabase au lieu de localStorage
+            let validUser = null;
+            try {
+                const { data, error } = await window.db.from('users')
+                    .select('*')
+                    .eq('role', 'Admin')
+                    .eq('status', 'Actif')
+                    .or(`name.ilike."${safeUser}",contact.eq."${safeUser}"`);
+                
+                if (!error && data && data.length > 0) {
+                    validUser = data.find(u => u.password === pass);
+                }
+            } catch (err) {
+                console.error("Erreur de connexion Admin:", err);
+            }
+
+            // Identifiants: admin / admin123456 (par défaut) OU utilisateur valide de Supabase
             if ((user === 'admin' && pass === 'admin123456') || validUser) {
                 // Sauvegarde de la session
                 sessionStorage.setItem('admin_auth_token', 'true');
