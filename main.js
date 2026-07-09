@@ -253,7 +253,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         
         if (userLoginForm) {
-            userLoginForm.addEventListener('submit', (e) => {
+            userLoginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const user = document.getElementById('userLoginInput').value.trim();
                 const pass = document.getElementById('userPassInput').value;
@@ -270,14 +270,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 const validUser = allowedUsers.find(u => {
                     const safeName = (u.name || '').toString().trim().toLowerCase();
-                    const contactField = (u.contact || u.phone || u.email || '').toString().trim().toLowerCase();
+                    const safeContact = (u.contact || '').toString().trim().toLowerCase();
+                    const safePhone = (u.phone || '').toString().trim().toLowerCase();
+                    const safeEmail = (u.email || '').toString().trim().toLowerCase();
                     const inputLower = user.trim().toLowerCase();
                     
-                    // Si l'utilisateur enregistré n'a ni nom ni contact valides, on l'ignore
-                    if (!safeName && !contactField) return false;
+                    if (!safeName && !safeContact && !safePhone && !safeEmail) return false;
 
                     const matchName = safeName === inputLower;
-                    const matchContact = contactField === inputLower;
+                    const matchContact = safeContact === inputLower || safePhone === inputLower || safeEmail === inputLower;
                     
                     return (matchName || matchContact) && 
                            String(u.password).trim() === String(pass).trim() && 
@@ -345,7 +346,103 @@ document.addEventListener("DOMContentLoaded", () => {
                         }
                     }
                 } else {
-                    userLoginError.classList.remove('hidden');
+                    // Fallback to Supabase pour les anciens comptes non stockés dans localStorage
+                    const submitBtn = userLoginForm.querySelector('button[type="submit"]');
+                    const btnText = submitBtn.querySelector('.btn-text') || submitBtn;
+                    const originalText = btnText.textContent;
+                    
+                    btnText.textContent = "Vérification...";
+                    submitBtn.style.opacity = '0.8';
+                    userLoginError.classList.add('hidden');
+
+                    try {
+                        let isWorker = true;
+                        const { data: workersByName, error: errW1 } = await window.db.from('workers').select('id, password').ilike('name', `%${user}%`);
+                        const { data: workersByPhone, error: errW2 } = await window.db.from('workers').select('id, password').eq('phone', user);
+                        
+                        if (errW1 || errW2) throw new Error("Erreur Supabase");
+
+                        let accountList = [...(workersByName || []), ...(workersByPhone || [])];
+
+                        if (accountList.length === 0) {
+                            isWorker = false;
+                            const { data: usersByName, error: errU1 } = await window.db.from('users').select('id, password, role').ilike('name', `%${user}%`);
+                            const { data: usersByContact, error: errU2 } = await window.db.from('users').select('id, password, role').eq('phone', user);
+                            
+                            if (errU1 || errU2) throw new Error("Erreur Supabase");
+                            
+                            accountList = [...(usersByName || []), ...(usersByContact || [])];
+                        }
+
+                        const validAccount = (accountList || []).find(acc => String(acc.password) === String(pass).trim());
+
+                        if (!validAccount) {
+                            userLoginError.classList.remove('hidden');
+                            userLoginError.textContent = "Identifiants incorrects.";
+                            btnText.textContent = originalText;
+                            submitBtn.style.opacity = '1';
+                            return;
+                        }
+
+                        if (remember) {
+                            localStorage.setItem('user_saved_login', user);
+                            localStorage.setItem('user_saved_pass', pass);
+                        } else {
+                            localStorage.removeItem('user_saved_login');
+                            localStorage.removeItem('user_saved_pass');
+                        }
+
+                        // Synchronisation vers localStorage pour les prochaines connexions hors ligne
+                        if (isWorker) {
+                            const { data: fullWorker } = await window.db.from('workers').select('*').eq('id', validAccount.id).single();
+                            if (fullWorker) {
+                                let workers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
+                                if (!workers.find(w => String(w.id) === String(fullWorker.id))) {
+                                    workers.push(fullWorker);
+                                    localStorage.setItem('depanne_workers', JSON.stringify(workers));
+                                }
+                            }
+                            
+                            btnText.textContent = "Redirection...";
+                            sessionStorage.setItem('artisan_auth_token', 'true');
+                            sessionStorage.setItem('artisan_id', validAccount.id.toString());
+                            setTimeout(() => { window.location.href = 'artisan.html'; }, 600);
+                            
+                        } else {
+                            const { data: fullUser } = await window.db.from('users').select('*').eq('id', validAccount.id).single();
+                            if (fullUser) {
+                                let users = JSON.parse(localStorage.getItem('depanne_users')) || [];
+                                if (!users.find(u => String(u.id) === String(fullUser.id))) {
+                                    users.push(fullUser);
+                                    localStorage.setItem('depanne_users', JSON.stringify(users));
+                                }
+                            }
+                            
+                            if (validAccount.role === 'Admin') {
+                                btnText.textContent = "Redirection...";
+                                sessionStorage.setItem('admin_logged_in', 'true');
+                                setTimeout(() => { window.location.href = 'admin.html'; }, 600);
+                            } else {
+                                sessionStorage.setItem('client_auth_token', 'true');
+                                sessionStorage.setItem('client_id', validAccount.id.toString());
+                                sessionStorage.setItem('client_logged_in', 'true');
+                                sessionStorage.setItem('client_name', fullUser ? fullUser.name : 'Client');
+                                
+                                alert("Bienvenue dans votre espace client !");
+                                userLoginModal.classList.remove('active');
+                                document.body.style.overflow = '';
+                                updateAuthUI();
+                                btnText.textContent = originalText;
+                                submitBtn.style.opacity = '1';
+                            }
+                        }
+                    } catch (err) {
+                        console.error("Erreur de connexion fallback :", err);
+                        userLoginError.classList.remove('hidden');
+                        userLoginError.textContent = "Identifiants incorrects ou erreur réseau.";
+                        btnText.textContent = originalText;
+                        submitBtn.style.opacity = '1';
+                    }
                 }
             });
         }
@@ -406,15 +503,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 depanne_users.push(newClient);
                 localStorage.setItem('depanne_users', JSON.stringify(depanne_users));
                 
-                const { error } = await db.from('users').insert([{
-                    id: newClient.id,
-                    name: newClient.name,
-                    phone: newClient.contact,
-                    password: newClient.password,
-                    role: newClient.role,
-                    status: newClient.status,
-                    dateJoined: newClient.dateJoined
-                }]);
+                let error = null;
+                if (window.db) {
+                    const { error: dbError } = await window.db.from('users').insert([{
+                        id: newClient.id,
+                        name: newClient.name,
+                        phone: newClient.contact,
+                        password: newClient.password,
+                        role: newClient.role,
+                        status: newClient.status,
+                        dateJoined: newClient.dateJoined
+                    }]);
+                    error = dbError;
+                }
                 
                 if (error) {
                     console.error("Erreur création client :", error);
@@ -623,13 +724,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
 
-            // Fonction pour finaliser
             async function finalizeRegistration(message) {
                 let workers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
                 workers.push(pendingWorkerData);
                 localStorage.setItem('depanne_workers', JSON.stringify(workers));
                 
-                const { error } = await db.from('workers').insert([pendingWorkerData]);
+                let error = null;
+                if (window.db) {
+                    const { error: dbError } = await window.db.from('workers').insert([pendingWorkerData]);
+                    error = dbError;
+                }
                 if (error) {
                     console.error("Erreur d'inscription :", error);
                     alert("Une erreur est survenue lors de l'enregistrement de vos données.");
@@ -685,7 +789,11 @@ document.addEventListener("DOMContentLoaded", () => {
                                 workers.push(pendingWorkerData);
                                 localStorage.setItem('depanne_workers', JSON.stringify(workers));
                                 
-                                const { error } = await db.from('workers').insert([pendingWorkerData]);
+                                let error = null;
+                                if (window.db) {
+                                    const { error: dbError } = await window.db.from('workers').insert([pendingWorkerData]);
+                                    error = dbError;
+                                }
                                 if (error) {
                                     console.error("Erreur de paiement :", error);
                                     alert("Erreur lors de l'enregistrement de l'artisan.");
