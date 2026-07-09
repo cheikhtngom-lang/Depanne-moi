@@ -864,10 +864,114 @@ document.addEventListener("DOMContentLoaded", () => {
     const searchJob = document.getElementById('searchJob');
     const searchLoc = document.getElementById('searchLoc');
     const mainSearchBtn = document.getElementById('mainSearchBtn');
+    const voiceSearchBtn = document.getElementById('voiceSearchBtn');
     const searchResultsModal = document.getElementById('searchResultsModal');
     const closeSearchModalBtn = document.getElementById('closeSearchModalBtn');
     const searchResultsList = document.getElementById('searchResultsList');
     const searchQueryText = document.getElementById('searchQueryText');
+
+    // --- RECHERCHE VOCALE ---
+    if (voiceSearchBtn && searchJob) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'fr-FR';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            voiceSearchBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                voiceSearchBtn.style.transform = 'scale(1.2)';
+                voiceSearchBtn.style.color = '#e74c3c';
+                searchJob.placeholder = "Écoute en cours...";
+                searchJob.value = "";
+                
+                try {
+                    recognition.start();
+                } catch(err) {}
+            });
+
+            recognition.addEventListener('result', (e) => {
+                const transcript = e.results[0][0].transcript;
+                searchJob.value = transcript;
+                searchJob.placeholder = "Ex: Plombier, Électricien";
+                voiceSearchBtn.style.transform = 'scale(1)';
+                voiceSearchBtn.style.color = 'var(--color-primary-light)';
+                
+                // Déclencher automatiquement la recherche après une recherche vocale
+                if (mainSearchBtn) mainSearchBtn.click();
+            });
+
+            recognition.addEventListener('speechend', () => {
+                recognition.stop();
+                voiceSearchBtn.style.transform = 'scale(1)';
+                voiceSearchBtn.style.color = 'var(--color-primary-light)';
+                searchJob.placeholder = "Ex: Plombier, Électricien";
+            });
+
+            recognition.addEventListener('error', (e) => {
+                console.error("Erreur vocale :", e.error);
+                voiceSearchBtn.style.transform = 'scale(1)';
+                voiceSearchBtn.style.color = 'var(--color-primary-light)';
+                searchJob.placeholder = "Erreur micro. Tapez votre recherche.";
+            });
+        } else {
+            voiceSearchBtn.style.display = 'none';
+        }
+    }
+
+    // --- RECHERCHE INTELLIGENTE (Fuzzy Search & Levenshtein) ---
+    function levenshteinDistance(a, b) {
+        if (a.length === 0) return b.length;
+        if (b.length === 0) return a.length;
+        const matrix = [];
+        for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+        for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+        for (let i = 1; i <= b.length; i++) {
+            for (let j = 1; j <= a.length; j++) {
+                if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                    matrix[i][j] = matrix[i - 1][j - 1];
+                } else {
+                    matrix[i][j] = Math.min(
+                        matrix[i - 1][j - 1] + 1, // substitution
+                        Math.min(matrix[i][j - 1] + 1, // insertion
+                                 matrix[i - 1][j] + 1) // deletion
+                    );
+                }
+            }
+        }
+        return matrix[b.length][a.length];
+    }
+
+    function normalizeString(str) {
+        if (!str) return "";
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^\w\s]/gi, '');
+    }
+
+    function smartMatch(query, targetJob) {
+        if (!query || query.trim() === '') return true;
+        
+        const normQuery = normalizeString(query);
+        const normJob = normalizeString(targetJob);
+        
+        if (normJob.includes(normQuery) || normQuery.includes(normJob)) return true;
+        
+        // Séparer la phrase en mots-clés et ignorer les mots trop courts
+        const queryWords = normQuery.split(' ').filter(w => w.length > 3);
+        const jobWords = normJob.split(' ').filter(w => w.length > 2);
+        
+        for (let qw of queryWords) {
+            for (let jw of jobWords) {
+                const distance = levenshteinDistance(qw, jw);
+                // Tolérer plus d'erreurs pour les mots plus longs (ex: 1 faute tolérée par 3 lettres)
+                const maxErrors = Math.floor(jw.length / 3); 
+                if (distance <= maxErrors) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     if (mainSearchBtn && searchResultsModal) {
         mainSearchBtn.addEventListener('click', () => {
@@ -891,7 +995,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 
                 // Filtrage
                 const filtered = allWorkers.filter(w => {
-                    const matchJob = job === '' || w.job.toLowerCase().includes(job.toLowerCase());
+                    const matchJob = smartMatch(job, w.job);
                     const matchLoc = loc === '' || w.zone.toLowerCase().includes(loc.toLowerCase());
                     return matchJob && matchLoc;
                 });

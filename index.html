@@ -52,9 +52,12 @@
                 tranquillité.</p>
 
             <div class="glass-card search-card">
-                <div class="search-input">
+                <div class="search-input" style="position: relative;">
                     <label>Que recherchez-vous ?</label>
-                    <input type="text" id="searchJob" placeholder="Ex: Plombier, Électricien">
+                    <div style="display: flex; align-items: center; width: 100%;">
+                        <input type="text" id="searchJob" placeholder="Ex: Plombier, Électricien" style="width: 100%; padding-right: 40px; box-sizing: border-box;">
+                        <button id="voiceSearchBtn" title="Recherche vocale" style="position: absolute; right: 10px; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--color-primary-light); transition: transform 0.2s;">🎤</button>
+                    </div>
                 </div>
                 <div class="divider"></div>
                 <div class="search-input">
