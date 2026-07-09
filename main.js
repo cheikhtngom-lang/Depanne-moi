@@ -887,15 +887,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 searchQueryText.textContent = queryLabel.length > 0 ? `Résultats pour : ${queryLabel.join(' - ')}` : "Tous les artisans à proximité";
                 
                 // Récupération des vrais inscrits
-                const workers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
-                
-                // Ajout de quelques faux profils pour que la recherche donne toujours un résultat
-                const mockWorkers = [
-                    { name: 'Mamadou Diop', job: 'Plombier', zone: 'Dakar / Almadies', plan: 'Premium', phone: '+221771234567' },
-                    { name: 'Alioune Ndiaye', job: 'Électricien', zone: 'Thiès', plan: 'Standard', phone: '+221761234567' }
-                ];
-                
-                const allWorkers = [...workers, ...mockWorkers];
+                const allWorkers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
                 
                 // Filtrage
                 const filtered = allWorkers.filter(w => {
