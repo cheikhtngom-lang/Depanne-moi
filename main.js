@@ -917,6 +917,12 @@ document.addEventListener("DOMContentLoaded", () => {
                         const waLink = `https://wa.me/${phoneClean.replace('+', '')}?text=${encodeURIComponent(`Bonjour ${w.name}, j'ai trouvé votre profil sur Dépanne Moi et j'ai besoin de vos services pour...`)}`;
                         const callLink = `tel:${phoneClean}`;
                         
+                        // Enregistrer la vue du profil (simulation de trafic local)
+                        let stats = JSON.parse(localStorage.getItem('depanne_worker_stats')) || {};
+                        if (!stats[w.id]) stats[w.id] = { views: 0, wa: 0, calls: 0 };
+                        stats[w.id].views++;
+                        localStorage.setItem('depanne_worker_stats', JSON.stringify(stats));
+                        
                         searchResultsList.innerHTML += `
                             <div class="glass-panel" style="padding: 15px 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; animation: fadeIn 0.4s ease; background: rgba(255,255,255,0.85);">
                                 <div style="text-align: left;">
@@ -930,8 +936,8 @@ document.addEventListener("DOMContentLoaded", () => {
                                     <span style="${badgeStyle}">${w.plan}</span><br>
                                     <div style="margin-top: 10px; display: flex; gap: 5px; justify-content: flex-end;">
                                         <a href="#" class="btn magnetic review-worker-btn" data-id="${w.id}" data-name="${w.name}" style="padding: 6px 10px; font-size: 0.75rem; background: #f39c12; color: white; border-radius: 8px; border: none; text-decoration: none; box-shadow: 0 4px 10px rgba(243, 156, 18, 0.2);">⭐ Évaluer</a>
-                                        <a href="#" data-link="${waLink}" class="btn magnetic solicit-worker-btn" style="padding: 6px 10px; font-size: 0.75rem; background: #25D366; color: white; border-radius: 8px; border: none; text-decoration: none; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.2);">💬 WA</a>
-                                        <a href="#" data-link="${callLink}" class="btn magnetic solicit-worker-btn" style="padding: 6px 10px; font-size: 0.75rem; background: var(--color-primary); color: white; border-radius: 8px; border: none; text-decoration: none; box-shadow: 0 4px 10px rgba(26, 86, 123, 0.2);">📞 Appel</a>
+                                        <a href="#" data-id="${w.id}" data-link="${waLink}" class="btn magnetic solicit-worker-btn" style="padding: 6px 10px; font-size: 0.75rem; background: #25D366; color: white; border-radius: 8px; border: none; text-decoration: none; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.2);">💬 WA</a>
+                                        <a href="#" data-id="${w.id}" data-link="${callLink}" class="btn magnetic solicit-worker-btn" style="padding: 6px 10px; font-size: 0.75rem; background: var(--color-primary); color: white; border-radius: 8px; border: none; text-decoration: none; box-shadow: 0 4px 10px rgba(26, 86, 123, 0.2);">📞 Appel</a>
                                     </div>
                                 </div>
                             </div>
@@ -982,13 +988,22 @@ document.addEventListener("DOMContentLoaded", () => {
                     });
                 }
                 
-                // Attacher les écouteurs pour l'interception de contact
                 const solicitBtns = document.querySelectorAll('.solicit-worker-btn');
                 solicitBtns.forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         e.preventDefault();
                         const isClientLoggedIn = sessionStorage.getItem('client_logged_in') === 'true';
                         const targetLink = btn.getAttribute('data-link');
+                        const artisanId = btn.getAttribute('data-id');
+                        
+                        // Enregistrer le clic (WA ou Appel)
+                        if (artisanId) {
+                            let stats = JSON.parse(localStorage.getItem('depanne_worker_stats')) || {};
+                            if (!stats[artisanId]) stats[artisanId] = { views: 0, wa: 0, calls: 0 };
+                            if (targetLink.includes('wa.me')) stats[artisanId].wa++;
+                            else if (targetLink.includes('tel:')) stats[artisanId].calls++;
+                            localStorage.setItem('depanne_worker_stats', JSON.stringify(stats));
+                        }
                         
                         if (isClientLoggedIn) {
                             if (targetLink.includes('wa.me')) {

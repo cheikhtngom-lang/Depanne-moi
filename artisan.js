@@ -372,6 +372,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     let chartArtisanRegion, chartArtisanJob, chartArtisanTraffic, chartArtisanConversion;
+    
+    // Récupérer les stats réelles du local storage
+    const allStats = JSON.parse(localStorage.getItem('depanne_worker_stats')) || {};
+    const myStats = allStats[artisanId] || { views: 0, wa: 0, calls: 0 };
+    
+    // Mettre à jour les petites cartes de stats
+    const statCards = document.querySelectorAll('.stat-value');
+    if (statCards.length >= 3) {
+        statCards[0].textContent = myStats.views;
+        statCards[1].textContent = myStats.wa;
+        statCards[2].textContent = myStats.calls;
+    }
 
     // 1. Vues par Localisation (Bar Chart)
     const ctxRegion = document.getElementById('artisanRegionChart');
@@ -382,7 +394,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 labels: ['Dakar', 'Thiès', 'Autres'],
                 datasets: [{
                     label: 'Vues de mon profil',
-                    data: [85, 20, 5],
+                    data: [Math.round(myStats.views * 0.75), Math.round(myStats.views * 0.20), Math.round(myStats.views * 0.05)],
                     backgroundColor: 'rgba(32, 153, 131, 0.7)',
                     borderColor: 'rgba(32, 153, 131, 1)',
                     borderWidth: 1,
@@ -401,7 +413,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             data: {
                 labels: ['WhatsApp', 'Appels', 'Partages'],
                 datasets: [{
-                    data: [15, 8, 4],
+                    data: [myStats.wa, myStats.calls, Math.round(myStats.views * 0.05)],
                     backgroundColor: ['#2ecc71', '#3498db', '#f39c12'],
                     borderWidth: 0
                 }]
@@ -419,7 +431,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
                 datasets: [{
                     label: 'Visites',
-                    data: [12, 18, 15, 22, 20, 35, 42],
+                    data: Array.from({length: 7}, () => Math.round(myStats.views / 7 + (Math.random() * (myStats.views / 10)))),
                     borderColor: '#209983',
                     backgroundColor: 'rgba(32, 153, 131, 0.1)',
                     tension: 0.4,
@@ -442,7 +454,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 labels: ['Vues Simples', 'Prises de contact'],
                 datasets: [{
                     label: 'Performances',
-                    data: [124, 23],
+                    data: [myStats.views, myStats.wa + myStats.calls],
                     backgroundColor: ['#8d99ae', '#209983'],
                     borderRadius: 4
                 }]
@@ -464,37 +476,37 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (filter === 'annee') multiplier = 48;
 
             if (chartArtisanRegion) {
-                chartArtisanRegion.data.datasets[0].data = [85, 20, 5].map(v => Math.round(v * multiplier));
+                chartArtisanRegion.data.datasets[0].data = [Math.round(myStats.views * 0.75), Math.round(myStats.views * 0.20), Math.round(myStats.views * 0.05)].map(v => Math.round(v * multiplier));
                 chartArtisanRegion.update();
             }
 
             if (chartArtisanJob) {
-                chartArtisanJob.data.datasets[0].data = [15, 8, 4].map(v => Math.round(v * multiplier + (Math.random() * 2 * multiplier)));
+                chartArtisanJob.data.datasets[0].data = [myStats.wa, myStats.calls, Math.round(myStats.views * 0.05)].map(v => Math.round(v * multiplier + (Math.random() * 2 * multiplier)));
                 chartArtisanJob.update();
             }
 
             if (chartArtisanTraffic) {
                 if (filter === 'jour') {
                     chartArtisanTraffic.data.labels = ['8h', '12h', '16h', '20h'];
-                    chartArtisanTraffic.data.datasets[0].data = [2, 5, 3, 6];
+                    chartArtisanTraffic.data.datasets[0].data = [2, 5, 3, 6].map(v => Math.round((v/16)*myStats.views));
                 } else if (filter === 'semaine') {
                     chartArtisanTraffic.data.labels = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
-                    chartArtisanTraffic.data.datasets[0].data = [12, 18, 15, 22, 20, 35, 42];
+                    chartArtisanTraffic.data.datasets[0].data = Array.from({length: 7}, () => Math.round(myStats.views / 7 + (Math.random() * (myStats.views / 10))));
                 } else if (filter === 'mois') {
                     chartArtisanTraffic.data.labels = ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'];
-                    chartArtisanTraffic.data.datasets[0].data = [50, 65, 80, 95];
+                    chartArtisanTraffic.data.datasets[0].data = Array.from({length: 4}, () => Math.round(myStats.views * multiplier / 4));
                 } else if (filter === 'trimestre') {
                     chartArtisanTraffic.data.labels = ['Mois 1', 'Mois 2', 'Mois 3'];
-                    chartArtisanTraffic.data.datasets[0].data = [250, 310, 420];
+                    chartArtisanTraffic.data.datasets[0].data = Array.from({length: 3}, () => Math.round(myStats.views * multiplier / 3));
                 } else {
                     chartArtisanTraffic.data.labels = ['T1', 'T2', 'T3', 'T4'];
-                    chartArtisanTraffic.data.datasets[0].data = [800, 1100, 1450, 1600];
+                    chartArtisanTraffic.data.datasets[0].data = Array.from({length: 4}, () => Math.round(myStats.views * multiplier / 4));
                 }
                 chartArtisanTraffic.update();
             }
 
             if (chartArtisanConversion) {
-                chartArtisanConversion.data.datasets[0].data = [124, 23].map(v => Math.round(v * multiplier));
+                chartArtisanConversion.data.datasets[0].data = [myStats.views, myStats.wa + myStats.calls].map(v => Math.round(v * multiplier));
                 chartArtisanConversion.update();
             }
         });
