@@ -783,8 +783,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     let isWorker = true;
                     
                     // On fait deux requêtes séparées (une pour le nom, une pour le téléphone) 
-                    // pour éviter tous les bugs liés aux espaces ou caractères spéciaux dans la clause .or
-                    const { data: workersByName, error: errW1 } = await window.db.from('workers').select('id, password').ilike('name', loginInput);
+                    // On utilise % pour permettre une recherche partielle (ex: taper 'boubou' trouvera 'Boubou MBOW')
+                    const { data: workersByName, error: errW1 } = await window.db.from('workers').select('id, password').ilike('name', `%${loginInput}%`);
                     const { data: workersByPhone, error: errW2 } = await window.db.from('workers').select('id, password').eq('phone', loginInput);
                         
                     if (errW1 || errW2) {
@@ -800,7 +800,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     // 2. Si non trouvé dans les artisans, chercher dans les utilisateurs (Admins / Clients)
                     if (accountList.length === 0) {
                         isWorker = false;
-                        const { data: usersByName, error: errU1 } = await window.db.from('users').select('id, password, role').ilike('name', loginInput);
+                        const { data: usersByName, error: errU1 } = await window.db.from('users').select('id, password, role').ilike('name', `%${loginInput}%`);
                         const { data: usersByContact, error: errU2 } = await window.db.from('users').select('id, password, role').eq('contact', loginInput);
                             
                         if (errU1 || errU2) {

@@ -45,12 +45,13 @@ document.addEventListener("DOMContentLoaded", () => {
             // Vérification dans Supabase au lieu de localStorage
             let validUser = null;
             try {
-                // On fait deux requêtes séparées pour le nom et le contact pour éviter les bugs de clause .or avec des espaces
+                // On fait deux requêtes séparées pour le nom et le contact
+                // On utilise % pour la recherche partielle (ex: taper 'boubou' trouve 'Boubou MBOW')
                 const { data: dataByName, error: err1 } = await window.db.from('users')
                     .select('*')
                     .eq('role', 'Admin')
                     .eq('status', 'Actif')
-                    .ilike('name', user);
+                    .ilike('name', `%${user}%`);
                     
                 const { data: dataByContact, error: err2 } = await window.db.from('users')
                     .select('*')
