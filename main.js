@@ -624,6 +624,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 workers.push(pendingWorkerData);
                 localStorage.setItem('depanne_workers', JSON.stringify(workers));
                 
+                // Connexion automatique de l'artisan
+                sessionStorage.setItem('artisan_auth_token', 'true');
+                sessionStorage.setItem('artisan_id', pendingWorkerData.id.toString());
+                
                 alert(message);
                 
                 // Redirection automatique vers le reçu si ce n'est pas un essai gratuit
@@ -668,6 +672,10 @@ document.addEventListener("DOMContentLoaded", () => {
                                 let workers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
                                 workers.push(pendingWorkerData);
                                 localStorage.setItem('depanne_workers', JSON.stringify(workers));
+                                
+                                // Connexion automatique de l'artisan
+                                sessionStorage.setItem('artisan_auth_token', 'true');
+                                sessionStorage.setItem('artisan_id', pendingWorkerData.id.toString());
                                 
                                 alert("Paiement réussi ! Votre abonnement est activé. Vous allez être redirigé vers votre reçu.");
                                 

@@ -45,8 +45,9 @@
 <body>
 
     <div class="action-buttons no-print">
-        <a href="admin.html" class="btn btn-secondary">Retour à l'administration</a>
-        <button onclick="window.print()" class="btn">Imprimer PDF</button>
+        <a href="artisan.html" class="btn btn-secondary">Retour à ton profil</a>
+        <button onclick="window.print()" class="btn">Imprimer</button>
+        <button onclick="downloadPDF()" class="btn" style="background: #e67e22;">Télécharger (PDF)</button>
     </div>
 
     <div class="page-container" id="invoiceContent" style="display: none;">
@@ -208,6 +209,20 @@
 
             document.getElementById('invoiceContent').style.display = 'block';
         });
+
+        // Fonction pour télécharger la facture en PDF
+        function downloadPDF() {
+            const element = document.getElementById('invoiceContent');
+            const opt = {
+                margin:       0.2,
+                filename:     'Facture_Depanne_Moi.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </body>
 </html>
