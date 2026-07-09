@@ -781,12 +781,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 try {
                     // 1. Chercher d'abord dans les artisans (workers)
                     let isWorker = true;
-                    // On échappe les guillemets et on utilise ilike pour la casse
-                    const safeInput = loginInput.replace(/"/g, '""');
+                    // On supprime les guillemets éventuels pour ne pas casser la requête
+                    const safeInput = loginInput.replace(/"/g, '').replace(/,/g, '');
                     let { data: accountList, error } = await window.db
                         .from('workers')
                         .select('id, password')
-                        .or(`phone.eq."${safeInput}",name.ilike."${safeInput}"`);
+                        .or(`phone.eq.${safeInput},name.ilike.${safeInput}`);
                         
                     if (error) {
                         console.error("Erreur Supabase Login :", error);
@@ -802,7 +802,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         const { data: usersList, error: err2 } = await window.db
                             .from('users')
                             .select('id, password, role')
-                            .or(`contact.eq."${safeInput}",name.ilike."${safeInput}"`);
+                            .or(`contact.eq.${safeInput},name.ilike.${safeInput}`);
                             
                         if (err2) {
                             showError("Erreur lors de la vérification.");

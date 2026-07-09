@@ -42,8 +42,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const user = document.getElementById('adminUser').value.trim();
             const pass = document.getElementById('adminPass').value;
             
-            // On échappe les guillemets pour éviter les erreurs de syntaxe
-            const safeUser = user.replace(/"/g, '""');
+            // On nettoie les caractères spéciaux pour Supabase
+            const safeUser = user.replace(/"/g, '').replace(/,/g, '');
 
             // Vérification dans Supabase au lieu de localStorage
             let validUser = null;
@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     .select('*')
                     .eq('role', 'Admin')
                     .eq('status', 'Actif')
-                    .or(`name.ilike."${safeUser}",contact.eq."${safeUser}"`);
+                    .or(`name.ilike.${safeUser},contact.eq.${safeUser}`);
                 
                 if (!error && data && data.length > 0) {
                     validUser = data.find(u => u.password === pass);
