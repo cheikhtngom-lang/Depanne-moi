@@ -402,9 +402,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     dateJoined: new Date().toLocaleDateString('fr-FR')
                 };
                 
-                // let depanne_users = JSON.parse(localStorage.getItem('depanne_users')) || [];
-                // depanne_users.push(newClient);
-                // localStorage.setItem('depanne_users', JSON.stringify(depanne_users));
+                let depanne_users = JSON.parse(localStorage.getItem('depanne_users')) || [];
+                depanne_users.push(newClient);
+                localStorage.setItem('depanne_users', JSON.stringify(depanne_users));
                 
                 const { error } = await db.from('users').insert([{
                     id: newClient.id,
@@ -625,9 +625,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Fonction pour finaliser
             async function finalizeRegistration(message) {
-                // let workers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
-                // workers.push(pendingWorkerData);
-                // localStorage.setItem('depanne_workers', JSON.stringify(workers));
+                let workers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
+                workers.push(pendingWorkerData);
+                localStorage.setItem('depanne_workers', JSON.stringify(workers));
                 
                 const { error } = await db.from('workers').insert([pendingWorkerData]);
                 if (error) {
@@ -681,9 +681,9 @@ document.addEventListener("DOMContentLoaded", () => {
                             paymentStatusText.textContent = "Paiement validé ! Activation...";
                             
                             setTimeout(async () => {
-                                // let workers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
-                                // workers.push(pendingWorkerData);
-                                // localStorage.setItem('depanne_workers', JSON.stringify(workers));
+                                let workers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
+                                workers.push(pendingWorkerData);
+                                localStorage.setItem('depanne_workers', JSON.stringify(workers));
                                 
                                 const { error } = await db.from('workers').insert([pendingWorkerData]);
                                 if (error) {
@@ -745,126 +745,11 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
         
-        // Vraie connexion via Supabase (Artisans uniquement pour l'instant)
-        const userLoginForm = document.getElementById('userLoginForm');
-        if (userLoginForm) {
-            userLoginForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-
-                const errorMsgDiv = document.getElementById('userLoginError');
-                
-                function showError(msg) {
-                    if (errorMsgDiv) {
-                        errorMsgDiv.textContent = msg;
-                        errorMsgDiv.style.display = 'block';
-                        errorMsgDiv.classList.remove('hidden');
-                    } else {
-                        alert(msg);
-                    }
-                }
-
-                const loginInput = document.getElementById('userLoginInput') ? document.getElementById('userLoginInput').value.trim() : '';
-                const passwordInput = document.getElementById('userPassInput') ? document.getElementById('userPassInput').value : '';
-
-                if (!loginInput || !passwordInput) {
-                    showError("Veuillez remplir tous les champs.");
-                    return;
-                }
-                
-                const submitBtn = userLoginForm.querySelector('button[type="submit"]');
-                const submitBtnText = submitBtn.querySelector('.btn-text') || submitBtn;
-                const originalText = submitBtnText.textContent;
-                
-                submitBtnText.textContent = "Vérification...";
-                submitBtn.style.opacity = '0.8';
-
-                try {
-                    // 1. Chercher d'abord dans les artisans (workers)
-                    let isWorker = true;
-                    
-                    // On fait deux requêtes séparées (une pour le nom, une pour le téléphone) 
-                    // On utilise % pour permettre une recherche partielle (ex: taper 'boubou' trouvera 'Boubou MBOW')
-                    const { data: workersByName, error: errW1 } = await window.db.from('workers').select('id, password').ilike('name', `%${loginInput}%`);
-                    const { data: workersByPhone, error: errW2 } = await window.db.from('workers').select('id, password').eq('phone', loginInput);
-                        
-                    if (errW1 || errW2) {
-                        console.error("Erreur Supabase Login :", errW1 || errW2);
-                        showError("Erreur lors de la connexion à la base de données.");
-                        submitBtnText.textContent = originalText;
-                        submitBtn.style.opacity = '1';
-                        return;
-                    }
-
-                    let accountList = [...(workersByName || []), ...(workersByPhone || [])];
-
-                    // 2. Si non trouvé dans les artisans, chercher dans les utilisateurs (Admins / Clients)
-                    if (accountList.length === 0) {
-                        isWorker = false;
-                        const { data: usersByName, error: errU1 } = await window.db.from('users').select('id, password, role').ilike('name', `%${loginInput}%`);
-                        const { data: usersByContact, error: errU2 } = await window.db.from('users').select('id, password, role').eq('phone', loginInput);
-                            
-                        if (errU1 || errU2) {
-                            showError("Erreur lors de la vérification.");
-                            submitBtnText.textContent = originalText;
-                            submitBtn.style.opacity = '1';
-                            return;
-                        }
-                        accountList = [...(usersByName || []), ...(usersByContact || [])];
-                    }
-
-                    // On cherche le bon mot de passe dans les résultats (conversion en String obligatoire si Supabase renvoie un entier)
-                    const validAccount = (accountList || []).find(acc => String(acc.password) === String(passwordInput));
-
-                    if (!validAccount) {
-                        showError("Identifiant ou mot de passe incorrect.");
-                        submitBtnText.textContent = originalText;
-                        submitBtn.style.opacity = '1';
-                        return;
-                    }
-
-                    // Succès : connexion
-                    if (errorMsgDiv) errorMsgDiv.style.display = 'none';
-                    submitBtnText.textContent = "Succès !";
-                    
-                    setTimeout(() => {
-                        if (isWorker) {
-                            sessionStorage.setItem('artisan_auth_token', 'true');
-                            sessionStorage.setItem('artisan_id', validAccount.id.toString());
-                            window.location.href = 'artisan.html';
-                        } else {
-                            if (validAccount.role === 'Admin') {
-                                // Rediriger l'admin
-                                sessionStorage.setItem('admin_logged_in', 'true');
-                                window.location.href = 'admin.html';
-                            } else {
-                                // C'est un client : On reste sur la page, on change juste l'interface
-                                sessionStorage.setItem('client_auth_token', 'true');
-                                sessionStorage.setItem('client_id', validAccount.id.toString());
-                                alert("Bienvenue dans votre espace client !");
-                                
-                                const loginModal = document.getElementById('userLoginModal');
-                                if (loginModal) loginModal.classList.remove('active');
-                                document.body.style.overflow = '';
-                                
-                                const loginBtn = document.getElementById('openUserLoginModalBtn');
-                                const logoutBtn = document.getElementById('logoutClientBtn');
-                                if (loginBtn) loginBtn.style.display = 'none';
-                                if (logoutBtn) logoutBtn.style.display = 'block';
-                                
-                                submitBtnText.textContent = originalText;
-                                submitBtn.style.opacity = '1';
-                            }
-                        }
-                    }, 800);
-
-                } catch (err) {
-                    console.error("Erreur critique login:", err);
-                    showError("Une erreur inattendue s'est produite.");
-                    submitBtnText.textContent = originalText;
-                    submitBtn.style.opacity = '1';
-                }
-            });
-        }
+        // Vraie connexion via Supabase (Artisans uniquement pour l'instant) - DESACTIVEE CAR CONFLICTUELLE
+        /* const userLoginFormSupabase = document.getElementById('userLoginForm');
+        if (userLoginFormSupabase) {
+            // Logique de connexion commentée pour forcer l'usage du localStorage selon les règles du projet
+        } */
     }
 
     // 6. Search Logic
