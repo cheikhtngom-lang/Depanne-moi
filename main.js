@@ -543,46 +543,13 @@ document.addEventListener("DOMContentLoaded", () => {
             const paymentProcessing = document.getElementById('paymentProcessing');
             const paymentStatusText = document.getElementById('paymentStatusText');
 
-            // Geolocation Logic
-            const getLocationBtn = document.getElementById('getLocationBtn');
-            const getLocationBtnText = document.getElementById('getLocationBtnText');
-            const regLatitude = document.getElementById('regLatitude');
-            const regLongitude = document.getElementById('regLongitude');
-            const locationStatus = document.getElementById('locationStatus');
-
-            if (getLocationBtn) {
-                getLocationBtn.addEventListener('click', () => {
-                    if ("geolocation" in navigator) {
-                        getLocationBtnText.textContent = "Recherche en cours...";
-                        navigator.geolocation.getCurrentPosition((position) => {
-                            regLatitude.value = position.coords.latitude;
-                            regLongitude.value = position.coords.longitude;
-                            
-                            getLocationBtn.style.background = "rgba(46, 204, 113, 0.2)";
-                            getLocationBtn.style.borderColor = "#2ecc71";
-                            getLocationBtnText.textContent = "✅ Position GPS validée";
-                            getLocationBtnText.style.color = "#2ecc71";
-                            
-                            locationStatus.style.display = 'block';
-                            locationStatus.style.color = '#2ecc71';
-                            locationStatus.textContent = `Coordonnées enregistrées avec succès.`;
-                        }, (error) => {
-                            console.error("Erreur GPS:", error);
-                            getLocationBtnText.textContent = "📍 Réessayer";
-                            locationStatus.style.display = 'block';
-                            locationStatus.style.color = '#e74c3c';
-                            locationStatus.textContent = "Accès refusé ou impossible. Veuillez autoriser la localisation.";
-                        });
-                    } else {
-                        alert("La géolocalisation n'est pas supportée par votre navigateur.");
-                    }
-                });
-            }
+            // Geolocation logic was removed in favor of automatic geocoding on submit.
 
             workerForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 
                 const submitBtnText = document.getElementById('modalSubmitBtnText');
+                const originalBtnText = submitBtnText.textContent;
                 
                 // Déterminer la formule choisie
                 let selectedPlan = "Standard";
@@ -595,11 +562,33 @@ document.addEventListener("DOMContentLoaded", () => {
                     planPrice = 0;
                 }
 
-                // Validation de la localisation GPS (Obligatoire)
-                if (!regLatitude.value || !regLongitude.value) {
-                    alert("⚠️ Veuillez partager votre position GPS en cliquant sur le bouton 'Partager ma position GPS actuelle' pour pouvoir être trouvé par les clients.");
-                    return; // Stoppe la soumission
+                // Geocoding automatique basé sur la région et le quartier
+                const region = document.getElementById('regRegion').value;
+                const area = document.getElementById('regArea').value;
+                let lat = null;
+                let lon = null;
+                
+                submitBtnText.textContent = "Recherche localisation...";
+                try {
+                    const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(area + ', ' + region + ', Senegal')}&format=json&limit=1`);
+                    const data = await response.json();
+                    if (data && data.length > 0) {
+                        lat = parseFloat(data[0].lat);
+                        lon = parseFloat(data[0].lon);
+                    } else {
+                        // Fallback sur la région seule
+                        const fallback = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(region + ', Senegal')}&format=json&limit=1`);
+                        const fallbackData = await fallback.json();
+                        if (fallbackData && fallbackData.length > 0) {
+                            lat = parseFloat(fallbackData[0].lat);
+                            lon = parseFloat(fallbackData[0].lon);
+                        }
+                    }
+                } catch (e) {
+                    console.error("Geocoding failed", e);
                 }
+                
+                submitBtnText.textContent = originalBtnText;
 
                 pendingWorkerData = {
                     id: Date.now(),
@@ -607,9 +596,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     password: document.getElementById('regPassword') ? document.getElementById('regPassword').value : '123456',
                     phone: document.getElementById('regPhone').value,
                     job: document.getElementById('regJob').value,
-                    zone: `${document.getElementById('regRegion').value} / ${document.getElementById('regArea').value}`,
-                    latitude: regLatitude.value,
-                    longitude: regLongitude.value,
+                    zone: `${region} / ${area}`,
+                    latitude: lat,
+                    longitude: lon,
                     description: document.getElementById('regDescription') ? document.getElementById('regDescription').value : '',
                     audioDescription: currentAudioBase64,
                     profilePhoto: document.getElementById('profilePhotoPreview') ? document.getElementById('profilePhotoPreview').src : '',
