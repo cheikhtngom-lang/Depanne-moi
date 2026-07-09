@@ -766,56 +766,44 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (pendingWorkerData) {
                         pendingWorkerData.paymentMethod = provider;
                         
-                        // Simulation d'une IP et récupération de la zone
                         const fakeIp = `102.164.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
                         pendingWorkerData.ipLocation = `${fakeIp} - ${pendingWorkerData.zone || 'Localisation inconnue'}`;
                         
-                        // Sauvegarder les données temporaires dans sessionStorage pour les retrouver après la redirection
                         sessionStorage.setItem('pendingWorkerData', JSON.stringify(pendingWorkerData));
                     }
                     paymentOptions.style.display = 'none';
                     paymentProcessing.style.display = 'block';
-                    paymentStatusText.textContent = `Initialisation du paiement via ${provider}...`;
+                    paymentStatusText.textContent = `Connexion sécurisée à PayDunya (${provider})...`;
                     
-                    // Simulation du paiement sans backend (Vibe-code / Prototype)
-                    setTimeout(() => {
-                        paymentStatusText.textContent = "Paiement en cours...";
+                    if (window.PaydunyaService) {
+                        // Utilisation du nouveau Skill PayDunya
+                        const result = await window.PaydunyaService.initPayment(pendingWorkerData);
                         
-                        setTimeout(() => {
-                            paymentStatusText.textContent = "Paiement validé ! Activation...";
+                        if (result.success) {
+                            paymentStatusText.textContent = "Paiement validé par l'opérateur ! Finalisation...";
                             
-                            setTimeout(async () => {
-                                let workers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
-                                workers.push(pendingWorkerData);
-                                localStorage.setItem('depanne_workers', JSON.stringify(workers));
-                                
-                                let error = null;
-                                if (window.db) {
-                                    const { error: dbError } = await window.db.from('workers').insert([pendingWorkerData]);
-                                    error = dbError;
-                                }
-                                if (error) {
-                                    console.error("Erreur de paiement :", error);
-                                    alert("Erreur lors de l'enregistrement de l'artisan.");
-                                    return;
-                                }
-                                
-                                // Connexion automatique de l'artisan
-                                sessionStorage.setItem('artisan_auth_token', 'true');
-                                sessionStorage.setItem('artisan_id', pendingWorkerData.id.toString());
-                                
-                                alert("Paiement réussi (Supabase) ! Votre abonnement est activé. Vous allez être redirigé vers votre reçu.");
-                                
-                                window.location.href = `facture.html?id=${pendingWorkerData.id}`;
-                                
-                                workerForm.reset();
-                                paymentModal.classList.remove('active');
-                                registrationModal.classList.remove('active');
-                                document.body.style.overflow = '';
+                            // Enregistrement dans la DB après validation du paiement
+                            let workers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
+                            workers.push(pendingWorkerData);
+                            localStorage.setItem('depanne_workers', JSON.stringify(workers));
+                            
+                            if (window.db) {
+                                const { error: dbError } = await window.db.from('workers').insert([pendingWorkerData]);
+                                if (dbError) console.error("Erreur d'insertion:", dbError);
+                            }
+                            
+                            sessionStorage.setItem('artisan_auth_token', 'true');
+                            sessionStorage.setItem('artisan_id', pendingWorkerData.id.toString());
+                            
+                            setTimeout(() => {
+                                window.location.href = result.paymentUrl;
                             }, 1000);
-                            
-                        }, 2000);
-                    }, 1000);
+                        } else {
+                            alert("Erreur lors de l'initialisation du paiement: " + result.error);
+                            paymentOptions.style.display = 'flex';
+                            paymentProcessing.style.display = 'none';
+                        }
+                    }
                 };
 
                 if (payWaveBtn) payWaveBtn.addEventListener('click', () => processPayment('Wave'));
