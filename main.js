@@ -801,7 +801,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (accountList.length === 0) {
                         isWorker = false;
                         const { data: usersByName, error: errU1 } = await window.db.from('users').select('id, password, role').ilike('name', `%${loginInput}%`);
-                        const { data: usersByContact, error: errU2 } = await window.db.from('users').select('id, password, role').eq('contact', loginInput);
+                        const { data: usersByContact, error: errU2 } = await window.db.from('users').select('id, password, role').eq('phone', loginInput);
                             
                         if (errU1 || errU2) {
                             showError("Erreur lors de la vérification.");

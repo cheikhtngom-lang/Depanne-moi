@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     .select('*')
                     .eq('role', 'Admin')
                     .eq('status', 'Actif')
-                    .eq('contact', user);
+                    .eq('phone', user);
                 
                 const allData = [...(dataByName || []), ...(dataByContact || [])];
                 
@@ -758,7 +758,7 @@ async function renderUsersTable() {
             html += `
                 <tr style="animation: fadeIn 0.3s ease;">
                     <td><strong>${escapeHTML(u.name)}</strong></td>
-                    <td>${escapeHTML(u.contact)}</td>
+                    <td>${escapeHTML(u.phone || u.contact || '')}</td>
                     <td><span style="background: ${roleColor}; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">${escapeHTML(u.role)}</span></td>
                     <td><span style="color: ${statusColor}; font-weight: bold;">${escapeHTML(u.status)}</span></td>
                     <td>${escapeHTML(u.dateJoined)}</td>
@@ -822,7 +822,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const userData = {
                 name: document.getElementById('userNameInput').value,
-                contact: document.getElementById('userContactInput').value,
+                phone: document.getElementById('userContactInput').value,
                 role: document.getElementById('userRoleInput').value,
                 status: document.getElementById('userStatusInput').value
             };
@@ -867,7 +867,7 @@ window.editUser = async function(id) {
     document.getElementById('userModalTitle').textContent = "Modifier l'Utilisateur";
     document.getElementById('userIdInput').value = user.id;
     document.getElementById('userNameInput').value = user.name;
-    document.getElementById('userContactInput').value = user.contact;
+    document.getElementById('userContactInput').value = user.phone || user.contact || '';
     document.getElementById('userRoleInput').value = user.role;
     document.getElementById('userStatusInput').value = user.status;
     
