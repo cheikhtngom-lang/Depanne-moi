@@ -389,7 +389,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         
         if (clientRegistrationForm) {
-            clientRegistrationForm.addEventListener('submit', (e) => {
+            clientRegistrationForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const newClient = {
                     id: Date.now(),
@@ -402,9 +402,25 @@ document.addEventListener("DOMContentLoaded", () => {
                     dateJoined: new Date().toLocaleDateString('fr-FR')
                 };
                 
-                let depanne_users = JSON.parse(localStorage.getItem('depanne_users')) || [];
-                depanne_users.push(newClient);
-                localStorage.setItem('depanne_users', JSON.stringify(depanne_users));
+                // let depanne_users = JSON.parse(localStorage.getItem('depanne_users')) || [];
+                // depanne_users.push(newClient);
+                // localStorage.setItem('depanne_users', JSON.stringify(depanne_users));
+                
+                const { error } = await db.from('users').insert([{
+                    id: newClient.id,
+                    name: newClient.name,
+                    phone: newClient.contact,
+                    password: newClient.password,
+                    role: newClient.role,
+                    status: newClient.status,
+                    dateJoined: newClient.dateJoined
+                }]);
+                
+                if (error) {
+                    console.error("Erreur création client :", error);
+                    alert("Erreur lors de la création de votre compte.");
+                    return;
+                }
                 
                 sessionStorage.setItem('client_logged_in', 'true');
                 sessionStorage.setItem('client_name', newClient.name);
@@ -563,7 +579,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             }
 
-            workerForm.addEventListener('submit', (e) => {
+            workerForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 
                 const submitBtnText = document.getElementById('modalSubmitBtnText');
@@ -605,7 +621,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 // Si c'est l'essai gratuit, pas de paiement
                 if (planPrice === 0) {
-                    finalizeRegistration("Compte créé avec succès ! Votre essai gratuit est activé.");
+                    await finalizeRegistration("Compte créé avec succès (Supabase) ! Votre essai gratuit est activé.");
                 } else {
                     // Cacher modal inscription et afficher modal paiement
                     registrationModal.classList.remove('active');
@@ -619,10 +635,17 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
             // Fonction pour finaliser
-            function finalizeRegistration(message) {
-                let workers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
-                workers.push(pendingWorkerData);
-                localStorage.setItem('depanne_workers', JSON.stringify(workers));
+            async function finalizeRegistration(message) {
+                // let workers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
+                // workers.push(pendingWorkerData);
+                // localStorage.setItem('depanne_workers', JSON.stringify(workers));
+                
+                const { error } = await db.from('workers').insert([pendingWorkerData]);
+                if (error) {
+                    console.error("Erreur d'inscription :", error);
+                    alert("Une erreur est survenue lors de l'enregistrement de vos données.");
+                    return;
+                }
                 
                 // Connexion automatique de l'artisan
                 sessionStorage.setItem('artisan_auth_token', 'true');
@@ -668,16 +691,23 @@ document.addEventListener("DOMContentLoaded", () => {
                         setTimeout(() => {
                             paymentStatusText.textContent = "Paiement validé ! Activation...";
                             
-                            setTimeout(() => {
-                                let workers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
-                                workers.push(pendingWorkerData);
-                                localStorage.setItem('depanne_workers', JSON.stringify(workers));
+                            setTimeout(async () => {
+                                // let workers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
+                                // workers.push(pendingWorkerData);
+                                // localStorage.setItem('depanne_workers', JSON.stringify(workers));
+                                
+                                const { error } = await db.from('workers').insert([pendingWorkerData]);
+                                if (error) {
+                                    console.error("Erreur de paiement :", error);
+                                    alert("Erreur lors de l'enregistrement de l'artisan.");
+                                    return;
+                                }
                                 
                                 // Connexion automatique de l'artisan
                                 sessionStorage.setItem('artisan_auth_token', 'true');
                                 sessionStorage.setItem('artisan_id', pendingWorkerData.id.toString());
                                 
-                                alert("Paiement réussi ! Votre abonnement est activé. Vous allez être redirigé vers votre reçu.");
+                                alert("Paiement réussi (Supabase) ! Votre abonnement est activé. Vous allez être redirigé vers votre reçu.");
                                 
                                 window.location.href = `facture.html?id=${pendingWorkerData.id}`;
                                 

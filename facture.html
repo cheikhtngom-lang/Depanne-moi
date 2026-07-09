@@ -156,7 +156,7 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const workerId = urlParams.get('id');
 
@@ -165,10 +165,16 @@
                 return;
             }
 
-            const workers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
-            const worker = workers.find(w => w.id.toString() === workerId);
+            // Requête vers Supabase pour récupérer la facture
+            const { data: workers, error } = await db
+                .from('workers')
+                .select('*')
+                .eq('id', workerId);
+
+            const worker = workers && workers.length > 0 ? workers[0] : null;
 
             if (!worker) {
+                console.error("Facture introuvable ou erreur :", error);
                 document.getElementById('errorContent').style.display = 'block';
                 return;
             }
@@ -224,5 +230,8 @@
         }
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./supabaseClient.js"></script>
 </body>
 </html>
