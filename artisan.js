@@ -82,6 +82,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (document.getElementById('settingPhone')) {
         document.getElementById('settingPhone').value = currentWorker.phone || '';
     }
+    if (document.getElementById('settingRegion') && currentWorker.zone) {
+        const parts = currentWorker.zone.split(' / ');
+        document.getElementById('settingRegion').value = parts[0] || '';
+        if (document.getElementById('settingArea')) {
+            document.getElementById('settingArea').value = parts[1] || '';
+        }
+    }
     if (document.getElementById('settingDescription')) {
         document.getElementById('settingDescription').value = currentWorker.description || '';
     }
@@ -278,6 +285,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             e.preventDefault();
             const newName = document.getElementById('settingName').value;
             const newPhone = document.getElementById('settingPhone') ? document.getElementById('settingPhone').value : '';
+            const newRegion = document.getElementById('settingRegion') ? document.getElementById('settingRegion').value : '';
+            const newArea = document.getElementById('settingArea') ? document.getElementById('settingArea').value : '';
+            const newZone = newRegion && newArea ? `${newRegion} / ${newArea}` : (newRegion || newArea);
             const newDesc = document.getElementById('settingDescription') ? document.getElementById('settingDescription').value : '';
             const newPass = document.getElementById('settingPass').value;
             
@@ -291,6 +301,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 let updates = {
                     name: newName,
                     phone: newPhone,
+                    zone: newZone,
                     description: newDesc
                 };
                 
@@ -312,6 +323,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     // Update UI locale
                     currentWorker.name = newName;
                     currentWorker.phone = newPhone;
+                    currentWorker.zone = newZone;
                     currentWorker.description = newDesc;
                     if (newPass) currentWorker.password = newPass;
                     
