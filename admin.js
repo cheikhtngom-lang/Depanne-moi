@@ -42,20 +42,26 @@ document.addEventListener("DOMContentLoaded", () => {
             const user = document.getElementById('adminUser').value.trim();
             const pass = document.getElementById('adminPass').value;
             
-            // On nettoie les caractères spéciaux pour Supabase
-            const safeUser = user.replace(/"/g, '').replace(/,/g, '');
-
             // Vérification dans Supabase au lieu de localStorage
             let validUser = null;
             try {
-                const { data, error } = await window.db.from('users')
+                // On fait deux requêtes séparées pour le nom et le contact pour éviter les bugs de clause .or avec des espaces
+                const { data: dataByName, error: err1 } = await window.db.from('users')
                     .select('*')
                     .eq('role', 'Admin')
                     .eq('status', 'Actif')
-                    .or(`name.ilike.${safeUser},contact.eq.${safeUser}`);
+                    .ilike('name', user);
+                    
+                const { data: dataByContact, error: err2 } = await window.db.from('users')
+                    .select('*')
+                    .eq('role', 'Admin')
+                    .eq('status', 'Actif')
+                    .eq('contact', user);
                 
-                if (!error && data && data.length > 0) {
-                    validUser = data.find(u => u.password === pass);
+                const allData = [...(dataByName || []), ...(dataByContact || [])];
+                
+                if (allData.length > 0) {
+                    validUser = allData.find(u => u.password === pass);
                 }
             } catch (err) {
                 console.error("Erreur de connexion Admin:", err);

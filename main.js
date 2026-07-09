@@ -781,36 +781,35 @@ document.addEventListener("DOMContentLoaded", () => {
                 try {
                     // 1. Chercher d'abord dans les artisans (workers)
                     let isWorker = true;
-                    // On supprime les guillemets éventuels pour ne pas casser la requête
-                    const safeInput = loginInput.replace(/"/g, '').replace(/,/g, '');
-                    let { data: accountList, error } = await window.db
-                        .from('workers')
-                        .select('id, password')
-                        .or(`phone.eq.${safeInput},name.ilike.${safeInput}`);
+                    
+                    // On fait deux requêtes séparées (une pour le nom, une pour le téléphone) 
+                    // pour éviter tous les bugs liés aux espaces ou caractères spéciaux dans la clause .or
+                    const { data: workersByName, error: errW1 } = await window.db.from('workers').select('id, password').ilike('name', loginInput);
+                    const { data: workersByPhone, error: errW2 } = await window.db.from('workers').select('id, password').eq('phone', loginInput);
                         
-                    if (error) {
-                        console.error("Erreur Supabase Login :", error);
+                    if (errW1 || errW2) {
+                        console.error("Erreur Supabase Login :", errW1 || errW2);
                         showError("Erreur lors de la connexion à la base de données.");
                         submitBtnText.textContent = originalText;
                         submitBtn.style.opacity = '1';
                         return;
                     }
 
+                    let accountList = [...(workersByName || []), ...(workersByPhone || [])];
+
                     // 2. Si non trouvé dans les artisans, chercher dans les utilisateurs (Admins / Clients)
-                    if (!accountList || accountList.length === 0) {
+                    if (accountList.length === 0) {
                         isWorker = false;
-                        const { data: usersList, error: err2 } = await window.db
-                            .from('users')
-                            .select('id, password, role')
-                            .or(`contact.eq.${safeInput},name.ilike.${safeInput}`);
+                        const { data: usersByName, error: errU1 } = await window.db.from('users').select('id, password, role').ilike('name', loginInput);
+                        const { data: usersByContact, error: errU2 } = await window.db.from('users').select('id, password, role').eq('contact', loginInput);
                             
-                        if (err2) {
+                        if (errU1 || errU2) {
                             showError("Erreur lors de la vérification.");
                             submitBtnText.textContent = originalText;
                             submitBtn.style.opacity = '1';
                             return;
                         }
-                        accountList = usersList;
+                        accountList = [...(usersByName || []), ...(usersByContact || [])];
                     }
 
                     // On cherche le bon mot de passe dans les résultats
