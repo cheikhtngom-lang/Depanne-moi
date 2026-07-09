@@ -87,6 +87,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 setTimeout(() => {
                     loginOverlay.style.display = 'none';
                     adminDashboard.style.display = 'grid'; // Layout principal
+                    
+                    // Actualisation immédiate de toutes les données avec Skeleton Loaders
+                    if (typeof window.loadAdminData === 'function') window.loadAdminData();
+                    if (typeof window.renderUsersTable === 'function') window.renderUsersTable();
+                    if (typeof window.loadAdminReviews === 'function') window.loadAdminReviews();
                 }, 500);
             } else {
                 loginError.textContent = `Identifiants incorrects.`;
@@ -192,7 +197,16 @@ document.addEventListener("DOMContentLoaded", () => {
             '"': '&quot;'
         }[tag]));
         
-        async function loadAdminData() {
+        // Fonction globale pour pouvoir la recharger après la connexion
+        window.loadAdminData = async function() {
+            // Affichage des Skeletons en attendant les données
+            const skeletonRow = `<tr><td colspan="8" style="text-align: center;"><div class="skeleton skeleton-text" style="width: 100%; height: 30px;"></div></td></tr>`;
+            if (adminWorkersTable) adminWorkersTable.innerHTML = skeletonRow.repeat(3);
+            if (adminBillingTable) adminBillingTable.innerHTML = skeletonRow.repeat(3);
+            if (adminHistoryTable) adminHistoryTable.innerHTML = skeletonRow.repeat(3);
+            if (adminStandardTable) adminStandardTable.innerHTML = skeletonRow.repeat(3);
+            if (adminPremiumTable) adminPremiumTable.innerHTML = skeletonRow.repeat(3);
+            
             try {
                 const { data: workers, error } = await window.db.from('workers').select('*').order('id', { ascending: false });
                 if (error) {
@@ -200,6 +214,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     return;
                 }
                 
+                // Si la table est vide, on force un tableau vide au lieu de crasher
+                const safeWorkers = workers || [];     
                 let html = '';
                 let billingHtml = '';
                 let historyHtml = '';
@@ -331,9 +347,9 @@ document.addEventListener("DOMContentLoaded", () => {
             } catch (err) {
                 console.error("Exception in loadAdminData:", err);
             }
-        }
+        };
         
-        loadAdminData();
+        window.loadAdminData();
     }
 
     // Global Filter Logic (Text Search + Date)
@@ -736,9 +752,13 @@ if (!depanne_users) {
 }
 
 // Fonction pour rafraîchir le tableau
-async function renderUsersTable() {
+window.renderUsersTable = async function() {
     const tbody = document.getElementById('adminUsersTable');
     if (!tbody) return;
+    
+    // Skeleton
+    const skeletonRow = `<tr><td colspan="6" style="text-align: center;"><div class="skeleton skeleton-text" style="width: 100%; height: 30px;"></div></td></tr>`;
+    tbody.innerHTML = skeletonRow.repeat(3);
     
     // Fonction d'échappement XSS
     const escapeHTML = (str) => String(str || '').replace(/[&<>'"]/g, tag => ({
@@ -784,7 +804,7 @@ async function renderUsersTable() {
 
 // Appel initial
 document.addEventListener('DOMContentLoaded', () => {
-    renderUsersTable();
+    window.renderUsersTable();
 
     // Logique de la fenêtre modale (Ajout/Modification)
     const userModal = document.getElementById('userManagementModal');
@@ -1120,9 +1140,13 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(window.initAdminCharts, 800); // Laisse le temps à Chart.js de charger
     
     // --- Load Admin Reviews ---
-    const loadAdminReviews = () => {
+    window.loadAdminReviews = () => {
         const adminReviewsTable = document.getElementById('adminReviewsTable');
         if (!adminReviewsTable) return;
+        
+        // Skeleton
+        const skeletonRow = `<tr><td colspan="5" style="text-align: center;"><div class="skeleton skeleton-text" style="width: 100%; height: 30px;"></div></td></tr>`;
+        adminReviewsTable.innerHTML = skeletonRow.repeat(3);
         
         const allReviews = JSON.parse(localStorage.getItem('depanne_reviews')) || [];
         if (allReviews.length === 0) {
@@ -1172,5 +1196,5 @@ document.addEventListener('DOMContentLoaded', () => {
         adminReviewsTable.innerHTML = html;
     };
     
-    setTimeout(loadAdminReviews, 500);
+    setTimeout(window.loadAdminReviews, 500);
 });
