@@ -999,7 +999,21 @@ document.addEventListener("DOMContentLoaded", () => {
                         
                         if (isClientLoggedIn) {
                             if (targetLink.includes('wa.me')) {
-                                window.open(targetLink, '_blank');
+                                const wantsToShareLoc = confirm("Voulez-vous partager votre position GPS avec l'artisan pour faciliter son arrivée ?");
+                                if (wantsToShareLoc && "geolocation" in navigator) {
+                                    navigator.geolocation.getCurrentPosition((position) => {
+                                        const lat = position.coords.latitude;
+                                        const lng = position.coords.longitude;
+                                        const mapsLink = `https://www.google.com/maps?q=${lat},${lng}`;
+                                        const newLink = targetLink + encodeURIComponent(`\n\n📍 Ma position actuelle : ${mapsLink}`);
+                                        window.open(newLink, '_blank');
+                                    }, (error) => {
+                                        alert("Impossible de récupérer la position. Envoi du message sans la localisation.");
+                                        window.open(targetLink, '_blank');
+                                    });
+                                } else {
+                                    window.open(targetLink, '_blank');
+                                }
                             } else {
                                 window.location.href = targetLink;
                             }
