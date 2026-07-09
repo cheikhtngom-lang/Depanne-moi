@@ -1,7 +1,9 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // Vérification de session locale (Mitigation basique)
     const isAuthenticated = sessionStorage.getItem('artisan_auth_token') === 'true';
-    if (!isAuthenticated) {
+    const artisanId = sessionStorage.getItem('artisan_id');
+    
+    if (!isAuthenticated || !artisanId) {
         window.location.href = 'index.html';
         return;
     }
@@ -38,29 +40,26 @@ document.addEventListener('DOMContentLoaded', () => {
     if (artisanLogoutBtn) {
         artisanLogoutBtn.addEventListener('click', () => {
             sessionStorage.removeItem('artisan_auth_token');
+            sessionStorage.removeItem('artisan_id');
             window.location.href = 'index.html';
         });
     }
 
-    // 3. Charger les données de l'artisan connecté via son ID
-    let workers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
-    const artisanId = sessionStorage.getItem('artisan_id');
-    
+    // 3. Charger les données de l'artisan connecté via Supabase
     let currentWorker = null;
-    if (artisanId) {
-        // Chercher dans depanne_workers
-        currentWorker = workers.find(w => w.id == artisanId);
-        
-        // S'il n'est pas dans depanne_workers (peut-être créé depuis l'admin et listé dans depanne_users), chercher là-bas
-        if (!currentWorker) {
-            const users = JSON.parse(localStorage.getItem('depanne_users')) || [];
-            currentWorker = users.find(u => u.id == artisanId);
+    try {
+        const { data: worker, error } = await window.db.from('workers').select('*').eq('id', artisanId).single();
+        if (error || !worker) {
+            console.error("Artisan non trouvé dans Supabase:", error);
+            alert("Erreur: Profil artisan introuvable.");
+            sessionStorage.clear();
+            window.location.href = 'index.html';
+            return;
         }
-    }
-    
-    // Fallback de sécurité si l'artisan n'est pas trouvé
-    if (!currentWorker) {
-        currentWorker = workers.length > 0 ? workers[workers.length - 1] : { name: "Ouvrier Test", plan: "Essai" };
+        currentWorker = worker;
+    } catch (err) {
+        console.error("Erreur critique chargement artisan:", err);
+        return;
     }
 
     // Fonction d'échappement XSS
@@ -272,35 +271,61 @@ document.addEventListener('DOMContentLoaded', () => {
     // 4. Formulaire des Paramètres
     const settingsForm = document.getElementById('artisanSettingsForm');
     if (settingsForm) {
-        settingsForm.addEventListener('submit', (e) => {
+        settingsForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const newName = document.getElementById('settingName').value;
             const newDesc = document.getElementById('settingDescription') ? document.getElementById('settingDescription').value : '';
             const newPass = document.getElementById('settingPass').value;
             
-            // Mettre à jour dans localStorage (si le worker existe)
-            if (currentWorker.id) {
-                const index = workers.findIndex(w => w.id === currentWorker.id);
-                if (index !== -1) {
-                    workers[index].name = newName;
-                    workers[index].description = newDesc;
-                    if (currentWorker.plan === 'Premium') {
-                        workers[index].audioDescription = settingCurrentAudioBase64;
-                    }
-                    localStorage.setItem('depanne_workers', JSON.stringify(workers));
-                }
-            }
-            
-            // Update UI
-            document.getElementById('artisanHeaderName').textContent = escapeHTML(newName);
-            document.getElementById('welcomeName').textContent = escapeHTML(newName);
-            
-            if (avatarImg) {
-                avatarImg.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(newName)}&background=0F5A4D&color=fff`;
-            }
+            const submitBtn = settingsForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = "Enregistrement...";
+            submitBtn.disabled = true;
 
-            alert("Vos informations ont été mises à jour avec succès !");
-            document.getElementById('settingPass').value = ""; // Clear password field
+            try {
+                // Préparer les données à mettre à jour
+                let updates = {
+                    name: newName,
+                    description: newDesc
+                };
+                
+                if (currentWorker.plan === 'Premium') {
+                    updates.audioDescription = settingCurrentAudioBase64;
+                }
+                
+                if (newPass && newPass.trim() !== '') {
+                    updates.password = newPass.trim();
+                }
+
+                // Mettre à jour dans Supabase
+                const { error } = await window.db.from('workers').update(updates).eq('id', currentWorker.id);
+                
+                if (error) {
+                    console.error("Erreur de mise à jour :", error);
+                    alert("Erreur lors de la sauvegarde.");
+                } else {
+                    // Update UI locale
+                    currentWorker.name = newName;
+                    currentWorker.description = newDesc;
+                    if (newPass) currentWorker.password = newPass;
+                    
+                    document.getElementById('artisanHeaderName').textContent = escapeHTML(newName);
+                    document.getElementById('welcomeName').textContent = escapeHTML(newName);
+                    
+                    const avatarImg = document.getElementById('artisanAvatar');
+                    if (avatarImg) {
+                        avatarImg.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(newName)}&background=0F5A4D&color=fff`;
+                    }
+
+                    alert("Vos informations ont été mises à jour avec succès !");
+                    document.getElementById('settingPass').value = ""; // Clear password field
+                }
+            } catch (err) {
+                console.error("Erreur inattendue:", err);
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
         });
     }
 

@@ -756,71 +756,82 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
         
-        // Prevent form submission redirect for mockup
-        const clientLoginForm = document.getElementById('clientLoginForm');
-        if (clientLoginForm) {
-            clientLoginForm.addEventListener('submit', (e) => {
+        // Vraie connexion via Supabase (Artisans uniquement pour l'instant)
+        const userLoginForm = document.getElementById('userLoginForm');
+        if (userLoginForm) {
+            userLoginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
 
-                const now = Date.now();
-                let rateLimit = JSON.parse(localStorage.getItem('login_rate_limit')) || { attempts: 0, firstAttempt: now, blockedUntil: null };
-                const errorMsgDiv = document.getElementById('loginErrorMsg');
-
+                const errorMsgDiv = document.getElementById('userLoginError');
+                
                 function showError(msg) {
                     if (errorMsgDiv) {
                         errorMsgDiv.textContent = msg;
                         errorMsgDiv.style.display = 'block';
+                        errorMsgDiv.classList.remove('hidden');
                     } else {
                         alert(msg);
                     }
                 }
 
-                // Vérifier si l'utilisateur est actuellement bloqué
-                if (rateLimit.blockedUntil && now < rateLimit.blockedUntil) {
-                    const remainingMinutes = Math.ceil((rateLimit.blockedUntil - now) / 60000);
-                    showError(`Accès bloqué par sécurité. Veuillez réessayer dans ${remainingMinutes} minute(s).`);
+                const loginInput = document.getElementById('userLoginInput') ? document.getElementById('userLoginInput').value.trim() : '';
+                const passwordInput = document.getElementById('userPassInput') ? document.getElementById('userPassInput').value : '';
+
+                if (!loginInput || !passwordInput) {
+                    showError("Veuillez remplir tous les champs.");
                     return;
                 }
-
-                // Réinitialiser le compteur si la fenêtre de 2 minutes est dépassée et qu'on n'est pas bloqué
-                if (!rateLimit.blockedUntil && (now - rateLimit.firstAttempt > 2 * 60 * 1000)) {
-                    rateLimit = { attempts: 0, firstAttempt: now, blockedUntil: null };
-                }
-
-                // Simulation d'une vérification de mot de passe (le mot de passe correct est "admin123")
-                const passwordInput = clientLoginForm.querySelector('input[type="password"]');
-                const password = passwordInput ? passwordInput.value : '';
-
-                if (password !== "admin123") {
-                    rateLimit.attempts++;
-                    if (rateLimit.attempts >= 5) {
-                        rateLimit.blockedUntil = now + 10 * 60 * 1000; // Bloqué pour 10 minutes
-                        localStorage.setItem('login_rate_limit', JSON.stringify(rateLimit));
-                        showError(`Mot de passe incorrect. 5 tentatives échouées. Compte bloqué pour 10 minutes.`);
-                    } else {
-                        localStorage.setItem('login_rate_limit', JSON.stringify(rateLimit));
-                        showError(`Mot de passe incorrect. Tentative ${rateLimit.attempts}/5. (Astuce : tapez 'admin123')`);
-                    }
-                    return;
-                }
-
-                // Succès : réinitialisation du compteur
-                localStorage.removeItem('login_rate_limit');
-                sessionStorage.setItem('artisan_auth_token', 'true');
-                if (errorMsgDiv) errorMsgDiv.style.display = 'none';
-
-                alert("Connexion réussie ! (Redirection en cours...)");
-                loginModal.classList.remove('active');
-                const submitBtn = clientLoginForm.querySelector('button[type="submit"]');
+                
+                const submitBtn = userLoginForm.querySelector('button[type="submit"]');
                 const submitBtnText = submitBtn.querySelector('.btn-text') || submitBtn;
                 const originalText = submitBtnText.textContent;
                 
-                submitBtnText.textContent = "Connexion...";
+                submitBtnText.textContent = "Vérification...";
                 submitBtn.style.opacity = '0.8';
-                
-                setTimeout(() => {
-                    window.location.href = 'artisan.html';
-                }, 1000);
+
+                try {
+                    // Recherche par nom OU téléphone
+                    const { data: workers, error } = await window.db
+                        .from('workers')
+                        .select('id, password')
+                        .or(`phone.eq.${loginInput},name.eq.${loginInput}`);
+                        
+                    if (error) {
+                        console.error("Erreur Supabase Login :", error);
+                        showError("Erreur lors de la connexion à la base de données.");
+                        submitBtnText.textContent = originalText;
+                        submitBtn.style.opacity = '1';
+                        return;
+                    }
+
+                    // On cherche le bon mot de passe dans les résultats
+                    const validWorker = workers.find(w => w.password === passwordInput);
+
+                    if (!validWorker) {
+                        showError("Identifiant ou mot de passe incorrect.");
+                        submitBtnText.textContent = originalText;
+                        submitBtn.style.opacity = '1';
+                        return;
+                    }
+
+                    // Succès : connexion
+                    sessionStorage.setItem('artisan_auth_token', 'true');
+                    sessionStorage.setItem('artisan_id', validWorker.id.toString());
+                    
+                    if (errorMsgDiv) errorMsgDiv.style.display = 'none';
+
+                    submitBtnText.textContent = "Succès !";
+                    
+                    setTimeout(() => {
+                        window.location.href = 'artisan.html';
+                    }, 800);
+
+                } catch (err) {
+                    console.error("Erreur critique login:", err);
+                    showError("Une erreur inattendue s'est produite.");
+                    submitBtnText.textContent = originalText;
+                    submitBtn.style.opacity = '1';
+                }
             });
         }
     }
