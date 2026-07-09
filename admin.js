@@ -170,8 +170,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const adminPremiumTable = document.getElementById('adminPremiumTable');
 
     if (adminWorkersTable || adminBillingTable || adminHistoryTable || adminStandardTable || adminPremiumTable) {
-        const workers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
-        
         // Fonction d'échappement pour contrer les failles XSS
         const escapeHTML = (str) => String(str || '').replace(/[&<>'"]/g, tag => ({
             '&': '&amp;',
@@ -181,19 +179,24 @@ document.addEventListener("DOMContentLoaded", () => {
             '"': '&quot;'
         }[tag]));
         
-        let html = '';
-        let billingHtml = '';
-        let historyHtml = '';
-        let standardHtml = '';
-        let premiumHtml = '';
-        let totalRevenue = 0;
-        let premiumCount = 0;
+        async function loadAdminData() {
+            try {
+                const { data: workers, error } = await window.db.from('workers').select('*').order('id', { ascending: false });
+                if (error) {
+                    console.error("Erreur de chargement depuis Supabase:", error);
+                    return;
+                }
+                
+                let html = '';
+                let billingHtml = '';
+                let historyHtml = '';
+                let standardHtml = '';
+                let premiumHtml = '';
+                let totalRevenue = 0;
+                let premiumCount = 0;
 
-        if (workers.length > 0) {
-            // Inverser pour avoir les plus récents en premier
-            const sortedWorkers = [...workers].reverse();
-
-            sortedWorkers.forEach(w => {
+                if (workers && workers.length > 0) {
+                    workers.forEach(w => {
                 const badgeClass = w.plan === "Premium" ? "premium" : "standard";
                 
                 // Nettoyage du numéro de téléphone (conserve uniquement les chiffres)
@@ -312,6 +315,12 @@ document.addEventListener("DOMContentLoaded", () => {
             if (statRevenue) statRevenue.textContent = "0 FCFA";
             if (statPremiumWorkers) statPremiumWorkers.textContent = "0";
         }
+            } catch (err) {
+                console.error("Exception in loadAdminData:", err);
+            }
+        }
+        
+        loadAdminData();
     }
 
     // Global Filter Logic (Text Search + Date)
@@ -571,8 +580,15 @@ document.addEventListener("DOMContentLoaded", () => {
     // ---------------- END CHARTS ----------------
 
     // Fonction globale pour supprimer un ouvrier
-    window.deleteWorker = function(id, btnElement) {
+    window.deleteWorker = async function(id, btnElement) {
         if(confirm("🚨 Êtes-vous sûr de vouloir supprimer cet ouvrier de la plateforme ?\nCette action est irréversible.")) {
+            const { error } = await window.db.from('workers').delete().eq('id', id);
+            if (error) {
+                alert("Erreur lors de la suppression de l'artisan.");
+                console.error(error);
+                return;
+            }
+
             // Supprimer visuellement la ligne avec une petite animation
             const tr = btnElement.closest('tr');
             if (tr) {
@@ -580,11 +596,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 tr.style.opacity = '0';
                 setTimeout(() => tr.remove(), 300);
             }
-            
-            // Supprimer de la base de données locale
-            let workers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
-            workers = workers.filter(w => w.id !== id);
-            localStorage.setItem('depanne_workers', JSON.stringify(workers));
         }
     };
 
@@ -625,10 +636,12 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // Global Function for Admin Profile View
-window.openAdminProfileModal = function(workerId) {
-    const workers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
-    const worker = workers.find(w => w.id === workerId);
-    if (!worker) return;
+window.openAdminProfileModal = async function(workerId) {
+    const { data: worker, error } = await window.db.from('workers').select('*').eq('id', workerId).single();
+    if (error || !worker) {
+        alert("Impossible de charger les données de cet artisan.");
+        return;
+    }
 
     const modal = document.getElementById('adminProfileModal');
     const closeBtn = document.getElementById('closeAdminProfileModalBtn');
@@ -710,7 +723,7 @@ if (!depanne_users) {
 }
 
 // Fonction pour rafraîchir le tableau
-function renderUsersTable() {
+async function renderUsersTable() {
     const tbody = document.getElementById('adminUsersTable');
     if (!tbody) return;
     
@@ -719,32 +732,35 @@ function renderUsersTable() {
         '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
     }[tag]));
 
-    const users = JSON.parse(localStorage.getItem('depanne_users')) || [];
+    const { data: users, error } = await window.db.from('users').select('*').order('id', { ascending: false });
+    
     let html = '';
 
-    users.forEach(u => {
-        const statusBadge = u.status === 'Actif' ? 'active' : 'inactive'; // inline css status or standard active
-        const statusColor = u.status === 'Actif' ? '#2ecc71' : '#e74c3c';
-        const roleColor = u.role === 'Admin' ? '#9b59b6' : (u.role === 'Artisan' ? '#f39c12' : '#3498db');
+    if (!error && users && users.length > 0) {
+        users.forEach(u => {
+            const statusBadge = u.status === 'Actif' ? 'active' : 'inactive'; 
+            const statusColor = u.status === 'Actif' ? '#2ecc71' : '#e74c3c';
+            const roleColor = u.role === 'Admin' ? '#9b59b6' : (u.role === 'Artisan' ? '#f39c12' : '#3498db');
 
-        html += `
-            <tr style="animation: fadeIn 0.3s ease;">
-                <td><strong>${escapeHTML(u.name)}</strong></td>
-                <td>${escapeHTML(u.contact)}</td>
-                <td><span style="background: ${roleColor}; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">${escapeHTML(u.role)}</span></td>
-                <td><span style="color: ${statusColor}; font-weight: bold;">${escapeHTML(u.status)}</span></td>
-                <td>${escapeHTML(u.dateJoined)}</td>
-                <td>
-                    <div class="action-buttons">
-                        <button class="action-btn profile" onclick="editUser(${u.id})" title="Modifier">✏️</button>
-                        <button class="action-btn" onclick="toggleUserStatus(${u.id})" title="${u.status === 'Actif' ? 'Bloquer' : 'Activer'}">🚫</button>
-                        <button class="action-btn delete" onclick="deleteAppUser(${u.id})" title="Supprimer">🗑️</button>
-                        <button class="action-btn reset" onclick="resetUserPassword(${u.id})" title="Réinitialiser Mot de passe">🔑</button>
-                    </div>
-                </td>
-            </tr>
-        `;
-    });
+            html += `
+                <tr style="animation: fadeIn 0.3s ease;">
+                    <td><strong>${escapeHTML(u.name)}</strong></td>
+                    <td>${escapeHTML(u.contact)}</td>
+                    <td><span style="background: ${roleColor}; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">${escapeHTML(u.role)}</span></td>
+                    <td><span style="color: ${statusColor}; font-weight: bold;">${escapeHTML(u.status)}</span></td>
+                    <td>${escapeHTML(u.dateJoined)}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-btn profile" onclick="editUser(${u.id})" title="Modifier">✏️</button>
+                            <button class="action-btn" onclick="toggleUserStatus(${u.id})" title="${u.status === 'Actif' ? 'Bloquer' : 'Activer'}">🚫</button>
+                            <button class="action-btn delete" onclick="deleteAppUser(${u.id})" title="Supprimer">🗑️</button>
+                            <button class="action-btn reset" onclick="resetUserPassword(${u.id})" title="Réinitialiser Mot de passe">🔑</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+    }
     
     if (users.length === 0) {
         html = `<tr><td colspan="6" style="text-align: center;">Aucun utilisateur trouvé.</td></tr>`;
@@ -848,62 +864,58 @@ window.editUser = function(id) {
     setTimeout(() => modal.classList.remove('hidden-overlay'), 50);
 };
 
-window.toggleUserStatus = function(id) {
-    const users = JSON.parse(localStorage.getItem('depanne_users')) || [];
-    const index = users.findIndex(u => u.id === id);
-    if (index !== -1) {
-        users[index].status = users[index].status === 'Actif' ? 'Bloqué' : 'Actif';
-        localStorage.setItem('depanne_users', JSON.stringify(users));
+window.toggleUserStatus = async function(id) {
+    const { data: user } = await window.db.from('users').select('status').eq('id', id).single();
+    if (user) {
+        const newStatus = user.status === 'Actif' ? 'Bloqué' : 'Actif';
+        await window.db.from('users').update({ status: newStatus }).eq('id', id);
         renderUsersTable();
     }
 };
 
-window.deleteAppUser = function(id) {
+window.deleteAppUser = async function(id) {
     if (confirm("Êtes-vous sûr de vouloir supprimer définitivement cet utilisateur ?")) {
-        const users = JSON.parse(localStorage.getItem('depanne_users')) || [];
-        const filteredUsers = users.filter(u => u.id !== id);
-        localStorage.setItem('depanne_users', JSON.stringify(filteredUsers));
+        await window.db.from('users').delete().eq('id', id);
         renderUsersTable();
     }
 };
 
-window.resetUserPassword = function(id) {
-    const users = JSON.parse(localStorage.getItem('depanne_users')) || [];
-    const index = users.findIndex(u => u.id === id);
-    if (index === -1) return;
+window.resetUserPassword = async function(id) {
+    const { data: user } = await window.db.from('users').select('name').eq('id', id).single();
+    if (!user) return;
     
-    const newPassword = prompt(`Entrez le nouveau mot de passe pour l'utilisateur ${users[index].name}\n(Laissez vide pour en générer un automatiquement) :`);
+    const newPassword = prompt(`Entrez le nouveau mot de passe pour l'utilisateur ${user.name}\n(Laissez vide pour en générer un automatiquement) :`);
     
     if (newPassword !== null) {
         const finalPassword = newPassword.trim() !== "" ? newPassword.trim() : Math.random().toString(36).slice(-8);
-        users[index].password = finalPassword; 
-        localStorage.setItem('depanne_users', JSON.stringify(users));
-        alert(`✅ Mot de passe réinitialisé avec succès pour ${users[index].name}.\n\nNouveau mot de passe : ${finalPassword}\n\nVeuillez le communiquer à l'utilisateur de manière sécurisée.`);
+        await window.db.from('users').update({ password: finalPassword }).eq('id', id);
+        alert(`✅ Mot de passe réinitialisé avec succès pour ${user.name}.\n\nNouveau mot de passe : ${finalPassword}\n\nVeuillez le communiquer à l'utilisateur de manière sécurisée.`);
     }
 };
 
-window.resetWorkerPassword = function(id) {
-    const workers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
-    const index = workers.findIndex(w => w.id === id);
-    if (index === -1) return;
+window.resetWorkerPassword = async function(id) {
+    const { data: worker } = await window.db.from('workers').select('name').eq('id', id).single();
+    if (!worker) return;
     
-    const newPassword = prompt(`Entrez le nouveau mot de passe pour l'abonné ${workers[index].name}\n(Laissez vide pour en générer un automatiquement) :`);
+    const newPassword = prompt(`Entrez le nouveau mot de passe pour l'abonné ${worker.name}\n(Laissez vide pour en générer un automatiquement) :`);
     
     if (newPassword !== null) {
         const finalPassword = newPassword.trim() !== "" ? newPassword.trim() : Math.random().toString(36).slice(-8);
-        workers[index].password = finalPassword; 
-        localStorage.setItem('depanne_workers', JSON.stringify(workers));
-        alert(`✅ Mot de passe réinitialisé avec succès pour l'abonné ${workers[index].name}.\n\nNouveau mot de passe : ${finalPassword}\n\nVeuillez le communiquer à l'abonné de manière sécurisée.`);
+        await window.db.from('workers').update({ password: finalPassword }).eq('id', id);
+        alert(`✅ Mot de passe réinitialisé avec succès pour l'abonné ${worker.name}.\n\nNouveau mot de passe : ${finalPassword}\n\nVeuillez le communiquer à l'abonné de manière sécurisée.`);
     }
 };
 
 // --- Cinematic Charts Initialization ---
-window.initAdminCharts = function() {
+window.initAdminCharts = async function() {
     if (typeof Chart === 'undefined') return;
 
     // --- Dynamic Data Extraction ---
-    const workers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
-    const users = JSON.parse(localStorage.getItem('depanne_users')) || [];
+    const { data: workersList } = await window.db.from('workers').select('*');
+    const { data: usersList } = await window.db.from('users').select('*');
+    
+    const workers = workersList || [];
+    const users = usersList || [];
     
     // Update Global Stats
     const statGrowth = document.getElementById('statGrowth');
