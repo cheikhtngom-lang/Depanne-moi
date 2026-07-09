@@ -974,7 +974,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (mainSearchBtn && searchResultsModal) {
-        mainSearchBtn.addEventListener('click', () => {
+        mainSearchBtn.addEventListener('click', async () => {
             const job = searchJob ? searchJob.value.trim() : '';
             const loc = searchLoc ? searchLoc.value.trim() : '';
             
@@ -982,7 +982,22 @@ document.addEventListener("DOMContentLoaded", () => {
             const originalText = btnText.textContent;
             btnText.textContent = "Recherche en cours...";
             
-            setTimeout(() => {
+            try {
+                // Récupération depuis Supabase
+                let allWorkers = [];
+                if (window.db) {
+                    const { data, error } = await window.db.from('workers').select('*');
+                    if (error) {
+                        console.error("Erreur de récupération Supabase:", error);
+                        allWorkers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
+                    } else {
+                        allWorkers = data || [];
+                        localStorage.setItem('depanne_workers', JSON.stringify(allWorkers));
+                    }
+                } else {
+                    allWorkers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
+                }
+                
                 btnText.textContent = originalText;
                 
                 let queryLabel = [];
@@ -990,13 +1005,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (loc) queryLabel.push(loc);
                 searchQueryText.textContent = queryLabel.length > 0 ? `Résultats pour : ${queryLabel.join(' - ')}` : "Tous les artisans à proximité";
                 
-                // Récupération des vrais inscrits
-                const allWorkers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
-                
-                // Filtrage
+                // Filtrage intelligent
                 const filtered = allWorkers.filter(w => {
                     const matchJob = smartMatch(job, w.job);
-                    const matchLoc = loc === '' || w.zone.toLowerCase().includes(loc.toLowerCase());
+                    const matchLoc = loc === '' || (w.zone && w.zone.toLowerCase().includes(loc.toLowerCase()));
                     return matchJob && matchLoc;
                 });
 
@@ -1167,7 +1179,12 @@ document.addEventListener("DOMContentLoaded", () => {
                         if (reviewModal) reviewModal.classList.add('active');
                     });
                 });
-            }, 800);
+            } catch (err) {
+                console.error("Erreur générale lors de la recherche :", err);
+                btnText.textContent = originalText;
+                searchResultsList.innerHTML = '<p style="text-align:center; color: #e74c3c; padding: 20px;">Erreur de connexion à la base de données. Veuillez réessayer.</p>';
+                searchResultsModal.classList.add('active');
+            }
         });
 
         closeSearchModalBtn.addEventListener('click', () => {
