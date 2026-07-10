@@ -4,11 +4,8 @@
  */
 
 const PaydunyaService = {
-    // Dans une application en production, ces appels devraient passer par un Backend (Supabase Edge Functions)
-    // pour ne pas exposer la MASTER_KEY et PRIVATE_KEY dans le navigateur.
-    // Cette version est prévue pour interagir avec l'Edge Function.
-    
-    API_URL: 'https://votre-projet.supabase.co/functions/v1/paydunya-checkout', // URL de votre Edge Function
+    // Le backend local tourne sur le port 5000
+    API_URL: 'http://localhost:5000/api/payments/initiate',
 
     /**
      * Initie un paiement avec PayDunya
@@ -19,45 +16,30 @@ const PaydunyaService = {
         try {
             console.log(`[PayDunya] Initialisation du paiement pour ${workerData.name} - ${workerData.price} FCFA`);
             
-            // 1. Simulation d'un appel sécurisé vers Supabase Edge Function
-            // En production, décommentez le vrai fetch() et supprimez le setTimeout
-            
-            /*
+            // Appel sécurisé vers le serveur Backend Node.js
             const response = await fetch(this.API_URL, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    // Ajouter l'autorisation si nécessaire
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     amount: workerData.price,
-                    description: `Abonnement ${workerData.plan} pour ${workerData.name}`,
-                    workerId: workerData.id
+                    planType: workerData.plan,
+                    provider: workerData.paymentMethod || 'Wave', // Wave ou Orange Money
+                    userId: workerData.id.toString()
                 })
             });
 
             if (!response.ok) {
-                throw new Error("Erreur lors de la création de la facture PayDunya");
+                const errText = await response.text();
+                throw new Error("Erreur Backend: " + errText);
             }
 
             const data = await response.json();
             return {
                 success: true,
-                paymentUrl: data.response_text // L'URL vers laquelle rediriger le client
+                paymentUrl: data.paymentUrl // L'URL sécurisée générée par PayDunya
             };
-            */
-
-            // --- DEBUT SIMULATION ---
-            return new Promise((resolve) => {
-                setTimeout(() => {
-                    resolve({
-                        success: true,
-                        // Redirection factice pour le mode "Vibe Coding"
-                        paymentUrl: `facture.html?id=${workerData.id}&simulate_payment=success`
-                    });
-                }, 1500);
-            });
-            // --- FIN SIMULATION ---
 
         } catch (error) {
             console.error("[PayDunya Error]", error);

@@ -8,9 +8,8 @@ router.post('/initiate', paymentController.initiatePayment);
 // 2. Vérifier le statut d'un paiement (pour le polling frontend)
 router.get('/status/:id', paymentController.checkStatus);
 
-// 3. Webhooks (Doivent être accessibles publiquement sur internet en production)
-router.post('/webhooks/wave', paymentController.waveWebhook);
-router.post('/webhooks/orange-money', paymentController.orangeMoneyWebhook);
+// 3. Webhook PayDunya (Endpoint IPN) - Doit être accessible sur internet
+router.post('/paydunya-ipn', paymentController.paydunyaIpn);
 
 // 4. Routes de Simulation (Sandbox uniquement)
 router.get('/mock-checkout/:id', paymentController.mockCheckoutPage);
