@@ -61,10 +61,12 @@ a:not(.btn):hover {
 .bg-abstract {
     position: fixed;
     top: 0; left: 0; width: 100vw; height: 100vh;
-    background-size: cover;
+    background-size: 300px;
+    background-repeat: repeat;
     background-position: center;
     z-index: -1;
-    opacity: 0.8;
+    opacity: 0.05;
+    mix-blend-mode: multiply;
 }
 
 /* Typography Utilities */
