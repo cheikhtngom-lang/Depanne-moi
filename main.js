@@ -117,6 +117,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 const plan = btn.getAttribute('data-plan');
                 const price = btn.getAttribute('data-price');
                 
+                const workerForm = document.querySelector('.registration-form'); // on récupère le formulaire
+                if(workerForm) {
+                    workerForm.setAttribute('data-current-plan', plan);
+                    workerForm.setAttribute('data-current-price', price);
+                }
+                
                 if (plan === 'premium') {
                     modalSubtitle.innerHTML = `Formule <span style="color: var(--color-primary-light);">Premium</span> - ${price} FCFA/mois`;
                     modalSubmitBtnText.textContent = `Valider & Payer ${price} FCFA`;
@@ -652,16 +658,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 const submitBtnText = document.getElementById('modalSubmitBtnText');
                 const originalBtnText = submitBtnText.textContent;
                 
-                // Déterminer la formule choisie
+                // Déterminer la formule choisie dynamiquement
+                const savedPlan = workerForm.getAttribute('data-current-plan');
                 let selectedPlan = "Standard";
-                let planPrice = 5000;
-                if (submitBtnText.textContent.includes('8990')) {
-                    selectedPlan = "Premium";
-                    planPrice = 8990;
-                } else if (submitBtnText.textContent.includes('Gratuit')) {
-                    selectedPlan = "Essai";
-                    planPrice = 0;
-                }
+                if (savedPlan === 'premium') selectedPlan = "Premium";
+                if (savedPlan === 'essai') selectedPlan = "Essai";
+                
+                let planPrice = parseInt(workerForm.getAttribute('data-current-price')) || 0;
 
                 // Geocoding automatique basé sur la région et le quartier
                 const region = document.getElementById('regRegion').value;
