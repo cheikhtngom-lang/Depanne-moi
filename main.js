@@ -117,7 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const plan = btn.getAttribute('data-plan');
                 const price = btn.getAttribute('data-price');
                 
-                const workerForm = document.querySelector('.registration-form'); // on récupère le formulaire
+                const workerForm = document.querySelector('#registrationModal .registration-form'); // on récupère le bon formulaire
                 if(workerForm) {
                     workerForm.setAttribute('data-current-plan', plan);
                     workerForm.setAttribute('data-current-price', price);

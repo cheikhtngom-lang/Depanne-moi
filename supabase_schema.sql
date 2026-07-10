@@ -38,3 +38,18 @@ CREATE TABLE IF NOT EXISTS public.reviews (
     comment TEXT NOT NULL,
     date TEXT NOT NULL
 );
+
+-- Table : payments (Transactions PayDunya)
+CREATE TABLE IF NOT EXISTS public.payments (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    order_id TEXT,
+    provider TEXT NOT NULL,
+    transaction_id TEXT,
+    amount INTEGER NOT NULL,
+    currency TEXT DEFAULT 'XOF',
+    status TEXT DEFAULT 'Pending',
+    payment_url TEXT,
+    payment_date TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);

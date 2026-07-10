@@ -4,8 +4,10 @@
  */
 
 const PaydunyaService = {
-    // Le backend local tourne sur le port 5000
-    API_URL: 'http://localhost:5000/api/payments/initiate',
+    // Si on est sur Vercel, l'URL est la même que le site. En local, c'est le port 5000.
+    API_URL: window.location.hostname.includes('localhost') || window.location.hostname === '127.0.0.1' 
+             ? 'http://localhost:5000/api/payments/initiate' 
+             : '/api/payments/initiate',
 
     /**
      * Initie un paiement avec PayDunya
