@@ -98,7 +98,7 @@ exports.initiatePayment = async (req, res) => {
                 message: 'Paiement PayDunya initié avec succès'
             });
         } else {
-            throw new Error("Code de réponse invalide de PayDunya: " + data.response_code);
+            throw new Error(`Code PayDunya ${data.response_code}: ${data.response_text || 'Détails inconnus'}`);
         }
 
     } catch (error) {
