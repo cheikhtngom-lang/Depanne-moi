@@ -103,7 +103,7 @@ exports.initiatePayment = async (req, res) => {
 
     } catch (error) {
         console.error('[ERROR] Erreur lors de l\'initialisation du paiement:', error);
-        res.status(500).json({ error: 'Erreur interne du serveur. Avez-vous configuré les clés PayDunya ?' });
+        res.status(500).json({ error: error.message || 'Erreur interne du serveur.' });
     }
 };
 
