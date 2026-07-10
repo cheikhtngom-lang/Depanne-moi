@@ -24,6 +24,13 @@
 </head>
 
 <body>
+    <!-- SVG Filter for removing white background from logo -->
+    <svg style="width:0;height:0;position:absolute;" aria-hidden="true" focusable="false">
+      <filter id="remove-white" color-interpolation-filters="sRGB">
+        <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  -1 -1 -1 0 2.8" result="alpha" />
+        <feComponentTransfer><feFuncA type="discrete" tableValues="0 1" /></feComponentTransfer>
+      </filter>
+    </svg>
     <!-- Background Elements -->
     <div class="bg-abstract"
         style="background-image: url('Logo_depanne%20moi.png');">
@@ -32,7 +39,7 @@
     <!-- Navigation -->
     <nav class="glass-nav">
         <div class="nav-container">
-            <a href="#" class="logo"><img src="Logo_depanne%20moi.png" alt="Dépanne Moi" style="height: 40px; width: auto; vertical-align: middle; mix-blend-mode: multiply;"></a>
+            <a href="#" class="logo"><img src="Logo_depanne%20moi.png" alt="Dépanne Moi" style="height: 40px; width: auto; vertical-align: middle; filter: url(#remove-white);"></a>
             <div class="nav-links">
                 <a href="#services">Nos Services</a>
                 <a href="#premium">Abonnement Premium</a>
@@ -257,7 +264,7 @@
     <footer class="footer">
         <div class="container footer-content">
             <div class="footer-brand">
-                <a href="#" class="logo"><img src="Logo_depanne%20moi.png" alt="Dépanne Moi" style="height: 40px; width: auto; vertical-align: middle; mix-blend-mode: multiply;"></a>
+                <a href="#" class="logo"><img src="Logo_depanne%20moi.png" alt="Dépanne Moi" style="height: 40px; width: auto; vertical-align: middle; filter: url(#remove-white);"></a>
                 <p>La nouvelle norme du dépannage premium.</p>
             </div>
             <div class="footer-links">
