@@ -9,10 +9,11 @@ git add .
 
 echo.
 echo [2/3] Creation du commit (sauvegarde locale)...
-git commit -m "fix: mot de passe admin et affichage initial"
+git commit -m "deploy: integration backend vercel et supabase"
 
 echo.
 echo [3/3] Envoi des modifications vers GitHub...
+git pull --rebase
 git push
 
 echo.
