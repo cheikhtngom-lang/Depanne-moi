@@ -4,13 +4,13 @@ document.addEventListener("DOMContentLoaded", () => {
         let workers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
         workers.forEach(w => w.password = '123456');
         localStorage.setItem('depanne_workers', JSON.stringify(workers));
-        
+
         let users = JSON.parse(localStorage.getItem('depanne_users')) || [];
         users.forEach(u => {
-            if(u.role !== 'Admin') u.password = '123456';
+            if (u.role !== 'Admin') u.password = '123456';
         });
         localStorage.setItem('depanne_users', JSON.stringify(users));
-        
+
         localStorage.setItem('passwords_reset_123456_v2', 'true');
     }
     // --------------------------------------------------------------------
@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const clientName = sessionStorage.getItem('client_name') || 'Utilisateur';
         const loginBtn = document.getElementById('openUserLoginModalBtn');
         const logoutBtn = document.getElementById('logoutClientBtn');
-        
+
         if (loginBtn && logoutBtn) {
             if (isClientLoggedIn) {
                 // Raccourcir le nom s'il est trop long pour le bouton
@@ -37,14 +37,14 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
     };
-    
+
     // Initial UI check
     updateAuthUI();
-    
+
     const logoutBtn = document.getElementById('logoutClientBtn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
-            if(confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+            if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
                 sessionStorage.removeItem('client_logged_in');
                 sessionStorage.removeItem('client_name');
                 updateAuthUI();
@@ -80,11 +80,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const rect = btn.getBoundingClientRect();
             const x = e.clientX - rect.left - rect.width / 2;
             const y = e.clientY - rect.top - rect.height / 2;
-            
+
             // Limit the movement
             const moveX = x * 0.3;
             const moveY = y * 0.3;
-            
+
             // Applique l'effet magnetique + le scale demandé
             btn.style.transform = `translate(${moveX}px, ${moveY}px) scale(1.03)`;
         });
@@ -116,13 +116,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 e.preventDefault();
                 const plan = btn.getAttribute('data-plan');
                 const price = btn.getAttribute('data-price');
-                
+
                 const workerForm = document.querySelector('#registrationModal .registration-form'); // on récupère le bon formulaire
-                if(workerForm) {
+                if (workerForm) {
                     workerForm.setAttribute('data-current-plan', plan);
                     workerForm.setAttribute('data-current-price', price);
                 }
-                
+
                 if (plan === 'premium') {
                     modalSubtitle.innerHTML = `Formule <span style="color: var(--color-primary-light);">Premium</span> - ${price} FCFA/mois`;
                     modalSubmitBtnText.textContent = `Valider & Payer ${price} FCFA`;
@@ -158,11 +158,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const profilePhotoText = document.getElementById('profilePhotoText');
 
         if (regProfilePhoto && profilePhotoPreview && profilePhotoText) {
-            regProfilePhoto.addEventListener('change', function(e) {
+            regProfilePhoto.addEventListener('change', function (e) {
                 const file = e.target.files[0];
                 if (file) {
                     const reader = new FileReader();
-                    reader.onload = function(e) {
+                    reader.onload = function (e) {
                         profilePhotoPreview.src = e.target.result;
                         profilePhotoPreview.style.display = 'block';
                         profilePhotoText.style.display = 'none';
@@ -185,7 +185,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const termsModal = document.getElementById('termsModal');
         const closeTermsModalBtn = document.getElementById('closeTermsModalBtn');
 
-        if(openLegalModalBtn && legalModal) {
+        if (openLegalModalBtn && legalModal) {
             openLegalModalBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 legalModal.classList.add('active');
@@ -203,7 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
-        if(openTermsModalBtn && termsModal) {
+        if (openTermsModalBtn && termsModal) {
             openTermsModalBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 termsModal.classList.add('active');
@@ -227,14 +227,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const closeUserLoginBtn = document.getElementById('closeUserLoginModalBtn');
         const userLoginForm = document.getElementById('userLoginForm');
         const userLoginError = document.getElementById('userLoginError');
-        
+
         if (openUserLoginBtn && userLoginModal && closeUserLoginBtn) {
             openUserLoginBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 userLoginModal.classList.add('active');
                 document.body.style.overflow = 'hidden';
-                if(userLoginError) userLoginError.classList.add('hidden');
-                
+                if (userLoginError) userLoginError.classList.add('hidden');
+
                 // Pré-remplissage Se souvenir de moi
                 const savedUser = localStorage.getItem('user_saved_login');
                 const savedPass = localStorage.getItem('user_saved_pass');
@@ -244,12 +244,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     document.getElementById('userRememberMe').checked = true;
                 }
             });
-            
+
             closeUserLoginBtn.addEventListener('click', () => {
                 userLoginModal.classList.remove('active');
                 document.body.style.overflow = '';
             });
-            
+
             userLoginModal.addEventListener('click', (e) => {
                 if (e.target === userLoginModal) {
                     userLoginModal.classList.remove('active');
@@ -257,17 +257,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
         }
-        
+
         if (userLoginForm) {
             userLoginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const user = document.getElementById('userLoginInput').value.trim();
                 const pass = document.getElementById('userPassInput').value;
                 const remember = document.getElementById('userRememberMe').checked;
-                
+
                 let depanne_users = JSON.parse(localStorage.getItem('depanne_users')) || [];
                 let depanne_workers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
-                
+
                 // Combiner les deux listes, en excluant les Admins
                 const allowedUsers = [
                     ...depanne_users.filter(u => u.role !== 'Admin'),
@@ -280,17 +280,17 @@ document.addEventListener("DOMContentLoaded", () => {
                     const safePhone = (u.phone || '').toString().trim().toLowerCase();
                     const safeEmail = (u.email || '').toString().trim().toLowerCase();
                     const inputLower = user.trim().toLowerCase();
-                    
+
                     if (!safeName && !safeContact && !safePhone && !safeEmail) return false;
 
                     const matchName = safeName === inputLower;
                     const matchContact = safeContact === inputLower || safePhone === inputLower || safeEmail === inputLower;
-                    
-                    return (matchName || matchContact) && 
-                           String(u.password).trim() === String(pass).trim() && 
-                           u.status === 'Actif';
+
+                    return (matchName || matchContact) &&
+                        String(u.password).trim() === String(pass).trim() &&
+                        u.status === 'Actif';
                 });
-                
+
                 if (validUser) {
                     if (remember) {
                         localStorage.setItem('user_saved_login', user);
@@ -299,10 +299,10 @@ document.addEventListener("DOMContentLoaded", () => {
                         localStorage.removeItem('user_saved_login');
                         localStorage.removeItem('user_saved_pass');
                     }
-                    
+
                     userLoginModal.classList.remove('active');
                     document.body.style.overflow = '';
-                    
+
                     // Déterminer si l'utilisateur est un Client ou un Artisan
                     const isArtisan = validUser.plan || validUser.job || validUser.role === 'Artisan';
 
@@ -311,7 +311,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         sessionStorage.setItem('artisan_auth_token', 'true');
                         sessionStorage.setItem('artisan_id', validUser.id);
                         alert(`Connexion réussie ! Bienvenue dans votre tableau de bord, ${validUser.name}.`);
-                        
+
                         // Redirection vers le dashboard
                         const submitBtn = userLoginForm.querySelector('button[type="submit"]');
                         if (submitBtn) {
@@ -319,20 +319,20 @@ document.addEventListener("DOMContentLoaded", () => {
                             btnText.textContent = "Redirection...";
                             submitBtn.style.opacity = '0.8';
                         }
-                        
+
                         setTimeout(() => {
                             window.location.href = 'artisan.html';
                         }, 600);
-                        
+
                     } else {
                         // --- Logique CLIENT ---
                         sessionStorage.setItem('client_logged_in', 'true');
                         sessionStorage.setItem('client_name', validUser.name);
                         alert(`Bienvenue dans votre Espace Utilisateur, ${validUser.name} !`);
-                        
+
                         // Modification de l'UI pour montrer l'état connecté
                         updateAuthUI();
-                        
+
                         // Le bouton de profil est maintenant géré dynamiquement, pas besoin de ré-attacher l'alerte à chaque fois
                         const loginBtn = document.getElementById('openUserLoginModalBtn');
                         if (loginBtn) {
@@ -343,7 +343,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                 }
                             };
                         }
-                        
+
                         // Si on était en attente de contacter un ouvrier
                         const pendingLink = sessionStorage.getItem('pending_contact_link');
                         if (pendingLink) {
@@ -356,7 +356,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     const submitBtn = userLoginForm.querySelector('button[type="submit"]');
                     const btnText = submitBtn.querySelector('.btn-text') || submitBtn;
                     const originalText = btnText.textContent;
-                    
+
                     btnText.textContent = "Vérification...";
                     submitBtn.style.opacity = '0.8';
                     userLoginError.classList.add('hidden');
@@ -365,7 +365,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         let isWorker = true;
                         const { data: workersByName, error: errW1 } = await window.db.from('workers').select('id, password').ilike('name', `%${user}%`);
                         const { data: workersByPhone, error: errW2 } = await window.db.from('workers').select('id, password').eq('phone', user);
-                        
+
                         if (errW1 || errW2) throw new Error("Erreur Supabase");
 
                         let accountList = [...(workersByName || []), ...(workersByPhone || [])];
@@ -374,9 +374,9 @@ document.addEventListener("DOMContentLoaded", () => {
                             isWorker = false;
                             const { data: usersByName, error: errU1 } = await window.db.from('users').select('id, password, role').ilike('name', `%${user}%`);
                             const { data: usersByContact, error: errU2 } = await window.db.from('users').select('id, password, role').eq('phone', user);
-                            
+
                             if (errU1 || errU2) throw new Error("Erreur Supabase");
-                            
+
                             accountList = [...(usersByName || []), ...(usersByContact || [])];
                         }
 
@@ -408,12 +408,12 @@ document.addEventListener("DOMContentLoaded", () => {
                                     localStorage.setItem('depanne_workers', JSON.stringify(workers));
                                 }
                             }
-                            
+
                             btnText.textContent = "Redirection...";
                             sessionStorage.setItem('artisan_auth_token', 'true');
                             sessionStorage.setItem('artisan_id', validAccount.id.toString());
                             setTimeout(() => { window.location.href = 'artisan.html'; }, 600);
-                            
+
                         } else {
                             const { data: fullUser } = await window.db.from('users').select('*').eq('id', validAccount.id).single();
                             if (fullUser) {
@@ -423,7 +423,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                     localStorage.setItem('depanne_users', JSON.stringify(users));
                                 }
                             }
-                            
+
                             if (validAccount.role === 'Admin') {
                                 btnText.textContent = "Redirection...";
                                 sessionStorage.setItem('admin_logged_in', 'true');
@@ -433,7 +433,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                 sessionStorage.setItem('client_id', validAccount.id.toString());
                                 sessionStorage.setItem('client_logged_in', 'true');
                                 sessionStorage.setItem('client_name', fullUser ? fullUser.name : 'Client');
-                                
+
                                 alert("Bienvenue dans votre espace client !");
                                 userLoginModal.classList.remove('active');
                                 document.body.style.overflow = '';
@@ -452,13 +452,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
         }
-        
+
         // --- Client Registration Modal Logic (Interception) ---
         const clientRegistrationModal = document.getElementById('clientRegistrationModal');
         const closeClientRegModalBtn = document.getElementById('closeClientRegModalBtn');
         const clientRegistrationForm = document.getElementById('clientRegistrationForm');
         const switchToLoginBtn = document.getElementById('switchToLoginBtn');
-        
+
         if (clientRegistrationModal && closeClientRegModalBtn) {
             closeClientRegModalBtn.addEventListener('click', () => {
                 clientRegistrationModal.classList.remove('active');
@@ -471,7 +471,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
         }
-        
+
         if (switchToLoginBtn) {
             switchToLoginBtn.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -481,7 +481,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
         }
-        
+
         const switchToClientRegBtn = document.getElementById('switchToClientRegBtn');
         if (switchToClientRegBtn) {
             switchToClientRegBtn.addEventListener('click', (e) => {
@@ -490,7 +490,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 clientRegistrationModal.classList.add('active');
             });
         }
-        
+
         if (clientRegistrationForm) {
             clientRegistrationForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -504,11 +504,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     status: 'Actif',
                     dateJoined: new Date().toLocaleDateString('fr-FR')
                 };
-                
+
                 let depanne_users = JSON.parse(localStorage.getItem('depanne_users')) || [];
                 depanne_users.push(newClient);
                 localStorage.setItem('depanne_users', JSON.stringify(depanne_users));
-                
+
                 let error = null;
                 if (window.db) {
                     const { error: dbError } = await window.db.from('users').insert([{
@@ -522,21 +522,21 @@ document.addEventListener("DOMContentLoaded", () => {
                     }]);
                     error = dbError;
                 }
-                
+
                 if (error) {
                     console.error("Erreur création client :", error);
                     alert("Erreur lors de la création de votre compte.");
                     return;
                 }
-                
+
                 sessionStorage.setItem('client_logged_in', 'true');
                 sessionStorage.setItem('client_name', newClient.name);
                 clientRegistrationModal.classList.remove('active');
                 document.body.style.overflow = '';
-                
+
                 // Mettre à jour UI
                 updateAuthUI();
-                
+
                 const loginBtn = document.getElementById('openUserLoginModalBtn');
                 if (loginBtn) {
                     loginBtn.onclick = (ev) => {
@@ -546,7 +546,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         }
                     };
                 }
-                
+
                 // Reprendre l'action de contact en attente
                 const pendingLink = sessionStorage.getItem('pending_contact_link');
                 if (pendingLink) {
@@ -561,7 +561,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Simulate Account Creation and Activation
         const workerForm = registrationModal.querySelector('.registration-form');
         if (workerForm) {
-            
+
             // --- Audio Recording Logic ---
             let mediaRecorder;
             let audioChunks = [];
@@ -603,11 +603,11 @@ document.addEventListener("DOMContentLoaded", () => {
                         });
 
                         mediaRecorder.start();
-                        
+
                         recordAudioBtn.style.display = 'none';
                         stopAudioBtn.style.display = 'inline-block';
                         recordingTimer.style.display = 'inline-block';
-                        
+
                         secondsRecorded = 0;
                         recordingTimer.textContent = "00:00";
                         recordingTimerInterval = setInterval(() => {
@@ -615,7 +615,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             let m = Math.floor(secondsRecorded / 60).toString().padStart(2, '0');
                             let s = (secondsRecorded % 60).toString().padStart(2, '0');
                             recordingTimer.textContent = `${m}:${s}`;
-                            
+
                             // Auto stop at 30 seconds
                             if (secondsRecorded >= 30) {
                                 stopAudioBtn.click();
@@ -654,16 +654,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
             workerForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                
+
                 const submitBtnText = document.getElementById('modalSubmitBtnText');
                 const originalBtnText = submitBtnText.textContent;
-                
+
                 // Déterminer la formule choisie dynamiquement
                 const savedPlan = workerForm.getAttribute('data-current-plan');
                 let selectedPlan = "Standard";
                 if (savedPlan === 'premium') selectedPlan = "Premium";
                 if (savedPlan === 'essai') selectedPlan = "Essai";
-                
+
                 let planPrice = parseInt(workerForm.getAttribute('data-current-price')) || 0;
 
                 // Geocoding automatique basé sur la région et le quartier
@@ -671,7 +671,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const area = document.getElementById('regArea').value;
                 let lat = null;
                 let lon = null;
-                
+
                 submitBtnText.textContent = "Recherche localisation...";
                 try {
                     const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(area + ', ' + region + ', Senegal')}&format=json&limit=1`);
@@ -691,7 +691,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 } catch (e) {
                     console.error("Geocoding failed", e);
                 }
-                
+
                 submitBtnText.textContent = originalBtnText;
 
                 pendingWorkerData = {
@@ -718,11 +718,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else {
                     // Cacher modal inscription et afficher modal paiement
                     registrationModal.classList.remove('active');
-                    
+
                     paymentAmountText.textContent = `Montant à payer : ${new Intl.NumberFormat('fr-FR').format(planPrice).replace(/,/g, ' ')} FCFA`;
                     paymentOptions.style.display = 'flex';
                     paymentProcessing.style.display = 'none';
-                    
+
                     paymentModal.classList.add('active');
                 }
             });
@@ -731,7 +731,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 let workers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
                 workers.push(pendingWorkerData);
                 localStorage.setItem('depanne_workers', JSON.stringify(workers));
-                
+
                 let error = null;
                 if (window.db) {
                     const { error: dbError } = await window.db.from('workers').insert([pendingWorkerData]);
@@ -742,18 +742,18 @@ document.addEventListener("DOMContentLoaded", () => {
                     alert("Une erreur est survenue lors de l'enregistrement de vos données.");
                     return;
                 }
-                
+
                 // Connexion automatique de l'artisan
                 sessionStorage.setItem('artisan_auth_token', 'true');
                 sessionStorage.setItem('artisan_id', pendingWorkerData.id.toString());
-                
+
                 alert(message);
-                
+
                 // Redirection automatique vers le reçu si ce n'est pas un essai gratuit
                 if (pendingWorkerData.plan && pendingWorkerData.plan !== "Essai") {
                     window.open(`facture.html?id=${pendingWorkerData.id}`, '_blank');
                 }
-                
+
                 workerForm.reset();
                 if (paymentModal) paymentModal.classList.remove('active');
                 if (registrationModal) registrationModal.classList.remove('active');
@@ -768,36 +768,36 @@ document.addEventListener("DOMContentLoaded", () => {
                 const processPayment = async (provider) => {
                     if (pendingWorkerData) {
                         pendingWorkerData.paymentMethod = provider;
-                        
+
                         const fakeIp = `102.164.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
                         pendingWorkerData.ipLocation = `${fakeIp} - ${pendingWorkerData.zone || 'Localisation inconnue'}`;
-                        
+
                         sessionStorage.setItem('pendingWorkerData', JSON.stringify(pendingWorkerData));
                     }
                     paymentOptions.style.display = 'none';
                     paymentProcessing.style.display = 'block';
                     paymentStatusText.textContent = `Connexion sécurisée à PayDunya (${provider})...`;
-                    
+
                     if (window.PaydunyaService) {
                         // Utilisation du nouveau Skill PayDunya
                         const result = await window.PaydunyaService.initPayment(pendingWorkerData);
-                        
+
                         if (result.success) {
                             paymentStatusText.textContent = "Paiement validé par l'opérateur ! Finalisation...";
-                            
+
                             // Enregistrement dans la DB après validation du paiement
                             let workers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
                             workers.push(pendingWorkerData);
                             localStorage.setItem('depanne_workers', JSON.stringify(workers));
-                            
+
                             if (window.db) {
                                 const { error: dbError } = await window.db.from('workers').insert([pendingWorkerData]);
                                 if (dbError) console.error("Erreur d'insertion:", dbError);
                             }
-                            
+
                             sessionStorage.setItem('artisan_auth_token', 'true');
                             sessionStorage.setItem('artisan_id', pendingWorkerData.id.toString());
-                            
+
                             setTimeout(() => {
                                 window.location.href = result.paymentUrl;
                             }, 1000);
@@ -843,7 +843,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.body.style.overflow = '';
             }
         });
-        
+
         // Vraie connexion via Supabase (Artisans uniquement pour l'instant) - DESACTIVEE CAR CONFLICTUELLE
         /* const userLoginFormSupabase = document.getElementById('userLoginForm');
         if (userLoginFormSupabase) {
@@ -876,10 +876,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 voiceSearchBtn.style.color = '#e74c3c';
                 searchJob.placeholder = "Écoute en cours...";
                 searchJob.value = "";
-                
+
                 try {
                     recognition.start();
-                } catch(err) {}
+                } catch (err) { }
             });
 
             recognition.addEventListener('result', (e) => {
@@ -888,7 +888,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 searchJob.placeholder = "Ex: Plombier, Électricien";
                 voiceSearchBtn.style.transform = 'scale(1)';
                 voiceSearchBtn.style.color = 'var(--color-primary-light)';
-                
+
                 // Déclencher automatiquement la recherche après une recherche vocale
                 if (mainSearchBtn) mainSearchBtn.click();
             });
@@ -926,7 +926,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     matrix[i][j] = Math.min(
                         matrix[i - 1][j - 1] + 1, // substitution
                         Math.min(matrix[i][j - 1] + 1, // insertion
-                                 matrix[i - 1][j] + 1) // deletion
+                            matrix[i - 1][j] + 1) // deletion
                     );
                 }
             }
@@ -941,21 +941,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function smartMatch(query, targetJob) {
         if (!query || query.trim() === '') return true;
-        
+
         const normQuery = normalizeString(query);
         const normJob = normalizeString(targetJob);
-        
+
         if (normJob.includes(normQuery) || normQuery.includes(normJob)) return true;
-        
+
         // Séparer la phrase en mots-clés et ignorer les mots trop courts
         const queryWords = normQuery.split(' ').filter(w => w.length > 3);
         const jobWords = normJob.split(' ').filter(w => w.length > 2);
-        
+
         for (let qw of queryWords) {
             for (let jw of jobWords) {
                 const distance = levenshteinDistance(qw, jw);
                 // Tolérer plus d'erreurs pour les mots plus longs (ex: 1 faute tolérée par 3 lettres)
-                const maxErrors = Math.floor(jw.length / 3); 
+                const maxErrors = Math.floor(jw.length / 3);
                 if (distance <= maxErrors) {
                     return true;
                 }
@@ -967,7 +967,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (mainSearchBtn && searchResultsModal) {
         mainSearchBtn.addEventListener('click', async () => {
             const isClientLoggedIn = sessionStorage.getItem('client_logged_in') === 'true';
-            
+
             if (!isClientLoggedIn) {
                 // S'ils ne sont pas connectés, on ouvre la modale d'inscription client
                 const clientRegModal = document.getElementById('clientRegistrationModal');
@@ -980,11 +980,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const job = searchJob ? searchJob.value.trim() : '';
             const loc = searchLoc ? searchLoc.value.trim() : '';
-            
+
             const btnText = mainSearchBtn.querySelector('.btn-text');
             const originalText = btnText.textContent;
             btnText.textContent = "Recherche en cours...";
-            
+
             try {
                 // Récupération depuis Supabase
                 let allWorkers = [];
@@ -1000,14 +1000,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else {
                     allWorkers = JSON.parse(localStorage.getItem('depanne_workers')) || [];
                 }
-                
+
                 btnText.textContent = originalText;
-                
+
                 let queryLabel = [];
                 if (job) queryLabel.push(job);
                 if (loc) queryLabel.push(loc);
                 searchQueryText.textContent = queryLabel.length > 0 ? `Résultats pour : ${queryLabel.join(' - ')}` : "Tous les artisans à proximité";
-                
+
                 // Filtrage intelligent
                 const filtered = allWorkers.filter(w => {
                     const matchJob = smartMatch(job, w.job);
@@ -1016,24 +1016,24 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
 
                 searchResultsList.innerHTML = '';
-                
+
                 if (filtered.length === 0) {
                     searchResultsList.innerHTML = '<p style="text-align:center; color: var(--color-text-light); padding: 20px;">Aucun artisan trouvé pour ces critères. Essayez une autre région ou profession.</p>';
                 } else {
                     filtered.forEach(w => {
                         const badgeStyle = w.plan === 'Premium' ? 'background: rgba(58, 134, 255, 0.1); color: var(--color-primary-light); padding: 4px 10px; border-radius: 12px; font-weight: 600;' : 'background: rgba(141, 153, 174, 0.1); color: var(--color-text-light); padding: 4px 10px; border-radius: 12px; font-weight: 600;';
-                        
+
                         // Liens de contact
                         const phoneClean = w.phone ? w.phone.replace(/[^0-9+]/g, '') : '';
                         const waLink = `https://wa.me/${phoneClean.replace('+', '')}?text=${encodeURIComponent(`Bonjour ${w.name}, j'ai trouvé votre profil sur Dépanne Moi et j'ai besoin de vos services pour...`)}`;
                         const callLink = `tel:${phoneClean}`;
-                        
+
                         // Enregistrer la vue du profil (simulation de trafic local)
                         let stats = JSON.parse(localStorage.getItem('depanne_worker_stats')) || {};
                         if (!stats[w.id]) stats[w.id] = { views: 0, wa: 0, calls: 0 };
                         stats[w.id].views++;
                         localStorage.setItem('depanne_worker_stats', JSON.stringify(stats));
-                        
+
                         searchResultsList.innerHTML += `
                             <div class="glass-panel" style="padding: 15px 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; animation: fadeIn 0.4s ease; background: rgba(255,255,255,0.85);">
                                 <div style="text-align: left;">
@@ -1058,32 +1058,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 searchResultsModal.classList.add('active');
                 document.body.style.overflow = 'hidden';
-                
+
                 // Calcul de distance si le visiteur autorise la localisation
                 if ("geolocation" in navigator) {
                     navigator.geolocation.getCurrentPosition((position) => {
                         const visitorLat = position.coords.latitude;
                         const visitorLng = position.coords.longitude;
-                        
+
                         const distanceBadges = document.querySelectorAll('.distance-badge');
                         distanceBadges.forEach(badge => {
                             const artisanLat = parseFloat(badge.getAttribute('data-lat'));
                             const artisanLng = parseFloat(badge.getAttribute('data-lng'));
-                            
+
                             if (artisanLat && artisanLng) {
                                 // Formule de Haversine
                                 const R = 6371; // Rayon de la terre en km
                                 const dLat = (artisanLat - visitorLat) * Math.PI / 180;
                                 const dLon = (artisanLng - visitorLng) * Math.PI / 180;
-                                const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                                          Math.cos(visitorLat * Math.PI / 180) * Math.cos(artisanLat * Math.PI / 180) * 
-                                          Math.sin(dLon/2) * Math.sin(dLon/2);
-                                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                                const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                                    Math.cos(visitorLat * Math.PI / 180) * Math.cos(artisanLat * Math.PI / 180) *
+                                    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
                                 const distanceKm = (R * c).toFixed(1);
-                                
+
                                 // Estimation du temps (vitesse moyenne en ville : 30 km/h)
                                 const timeMin = Math.round((distanceKm / 30) * 60);
-                                
+
                                 badge.innerHTML = `<span style="color: #2ecc71; font-weight: bold;">📍 À ${distanceKm} km</span> (env. ${timeMin} min en voiture)`;
                                 badge.style.background = 'rgba(46, 204, 113, 0.1)';
                             }
@@ -1098,7 +1098,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         });
                     });
                 }
-                
+
                 const solicitBtns = document.querySelectorAll('.solicit-worker-btn');
                 solicitBtns.forEach(btn => {
                     btn.addEventListener('click', (e) => {
@@ -1106,7 +1106,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         const isClientLoggedIn = sessionStorage.getItem('client_logged_in') === 'true';
                         const targetLink = btn.getAttribute('data-link');
                         const artisanId = btn.getAttribute('data-id');
-                        
+
                         // Enregistrer le clic (WA ou Appel)
                         if (artisanId) {
                             let stats = JSON.parse(localStorage.getItem('depanne_worker_stats')) || {};
@@ -1115,7 +1115,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             else if (targetLink.includes('tel:')) stats[artisanId].calls++;
                             localStorage.setItem('depanne_worker_stats', JSON.stringify(stats));
                         }
-                        
+
                         if (isClientLoggedIn) {
                             if (targetLink.includes('wa.me')) {
                                 const wantsToShareLoc = confirm("Voulez-vous partager votre position GPS avec l'artisan pour faciliter son arrivée ?");
@@ -1139,7 +1139,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         } else {
                             // Mémoriser le lien pour y aller juste après la connexion/inscription
                             sessionStorage.setItem('pending_contact_link', targetLink);
-                            
+
                             // Ouvrir la modale d'inscription client (et fermer celle des résultats)
                             searchResultsModal.classList.remove('active');
                             const clientRegModal = document.getElementById('clientRegistrationModal');
@@ -1149,16 +1149,16 @@ document.addEventListener("DOMContentLoaded", () => {
                         }
                     });
                 });
-                
+
                 // Attacher les écouteurs pour les boutons "Évaluer"
                 const reviewBtns = document.querySelectorAll('.review-worker-btn');
                 const reviewModal = document.getElementById('reviewModal');
-                
+
                 reviewBtns.forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         e.preventDefault();
                         const isClientLoggedIn = sessionStorage.getItem('client_logged_in') === 'true';
-                        
+
                         if (!isClientLoggedIn) {
                             alert("Vous devez être connecté en tant que client pour laisser un avis.");
                             searchResultsModal.classList.remove('active');
@@ -1166,18 +1166,18 @@ document.addEventListener("DOMContentLoaded", () => {
                             if (clientRegModal) clientRegModal.classList.add('active');
                             return;
                         }
-                        
+
                         const artisanId = btn.getAttribute('data-id');
                         const artisanName = btn.getAttribute('data-name');
-                        
+
                         const revIdInput = document.getElementById('reviewArtisanId');
                         const revNameInput = document.getElementById('reviewArtisanNameInput');
                         const revNameText = document.getElementById('reviewArtisanName');
-                        
+
                         if (revIdInput) revIdInput.value = artisanId;
                         if (revNameInput) revNameInput.value = artisanName;
                         if (revNameText) revNameText.textContent = artisanName;
-                        
+
                         searchResultsModal.classList.remove('active');
                         if (reviewModal) reviewModal.classList.add('active');
                     });
@@ -1215,8 +1215,8 @@ document.addEventListener("DOMContentLoaded", () => {
         openForgotPassClientBtn.addEventListener('click', (e) => {
             e.preventDefault();
             // Close login modal if open
-            if(loginModal) loginModal.classList.remove('active');
-            
+            if (loginModal) loginModal.classList.remove('active');
+
             // Open forgot password modal
             forgotPassClientModal.classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -1227,14 +1227,14 @@ document.addEventListener("DOMContentLoaded", () => {
         closeForgotPassClientBtn.addEventListener('click', () => {
             forgotPassClientModal.classList.remove('active');
             document.body.style.overflow = '';
-            
+
             setTimeout(() => {
-                if(forgotPassClientForm) forgotPassClientForm.reset();
-                if(forgotPassClientSuccess) {
+                if (forgotPassClientForm) forgotPassClientForm.reset();
+                if (forgotPassClientSuccess) {
                     forgotPassClientSuccess.style.display = 'none';
                     forgotPassClientSuccess.textContent = '';
                 }
-                if(forgotPassClientSubmitBtn) forgotPassClientSubmitBtn.style.display = 'block';
+                if (forgotPassClientSubmitBtn) forgotPassClientSubmitBtn.style.display = 'block';
             }, 300);
         });
     }
@@ -1252,7 +1252,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             setTimeout(() => {
                 forgotPassClientSuccess.innerHTML = `✅ Si <strong>${contact}</strong> correspond à un compte actif, un lien de réinitialisation vous a été envoyé.<br><br>Veuillez vérifier vos messages.`;
-                
+
                 setTimeout(() => {
                     if (closeForgotPassClientBtn) closeForgotPassClientBtn.click();
                 }, 4000); // Fermeture automatique après 4s
@@ -1268,7 +1268,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const reviewForm = document.getElementById('reviewForm');
     const ratingProgressBar = document.getElementById('ratingProgressBar');
     const ratingText = document.getElementById('ratingText');
-    
+
     if (mainReviewModal && mainCloseReviewModalBtn) {
         mainCloseReviewModalBtn.addEventListener('click', () => {
             mainReviewModal.classList.remove('active');
@@ -1287,7 +1287,7 @@ document.addEventListener("DOMContentLoaded", () => {
             star.addEventListener('click', (e) => {
                 const value = parseInt(e.target.getAttribute('data-value'));
                 reviewScoreInput.value = value;
-                
+
                 // Colorize stars
                 starRatingSpans.forEach(s => {
                     if (parseInt(s.getAttribute('data-value')) <= value) {
@@ -1296,7 +1296,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         s.style.color = '#bdc3c7'; // Gray
                     }
                 });
-                
+
                 // Update Progress Bar
                 if (ratingProgressBar && ratingText) {
                     const percentage = (value / 5) * 100;
@@ -1327,12 +1327,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 alert("Veuillez sélectionner au moins une étoile.");
                 return;
             }
-            
+
             const artisanId = document.getElementById('reviewArtisanId').value;
             const artisanName = document.getElementById('reviewArtisanNameInput').value;
             const comment = document.getElementById('reviewComment').value.trim();
             const clientName = sessionStorage.getItem('client_name') || 'Client Anonyme';
-            
+
             const newReview = {
                 id: Date.now(),
                 artisanId: artisanId,
@@ -1342,15 +1342,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 comment: comment,
                 date: new Date().toLocaleDateString('fr-FR')
             };
-            
+
             let reviews = JSON.parse(localStorage.getItem('depanne_reviews')) || [];
             reviews.push(newReview);
             localStorage.setItem('depanne_reviews', JSON.stringify(reviews));
-            
+
             mainReviewModal.classList.remove('active');
             document.body.style.overflow = '';
             alert("Merci ! Votre avis a bien été enregistré.");
-            
+
             // Reset Form
             reviewForm.reset();
             reviewScoreInput.value = 0;
